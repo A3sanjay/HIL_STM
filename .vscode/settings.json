@@ -1,0 +1,27 @@
+{
+  "files.associations": {
+    "i2c_slave.h": "c",
+    "i2c_hal.c": "cpp",
+    "string.h": "c",
+    "i2c_slave_fsm_defs.h": "c",
+    "stdint.h": "c",
+    "i2c_defs.h": "c",
+    "max17261.h": "c",
+    "i2c_spi_periphs_control.h": "c",
+    "pca9555.h": "c",
+    "any.pb.h": "c",
+    "stdbool.h": "c",
+    "spi_slave_fsm_defs.h": "c",
+    "spi_slave.h": "c",
+    "spi_defs.h": "c",
+    "pb_decode.h": "c",
+    "pb_encode.h": "c",
+    "main.h": "c",
+    "uart_control.h": "c",
+    "uart.h": "c",
+    "uart_fsm_defs.h": "c",
+    "mcp2515.h": "c",
+    "mcp2515_defs.h": "c",
+    "pca9555_defs.h": "c"
+  }
+}

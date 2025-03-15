@@ -1,0 +1,6 @@
+../Core/Src/i2c_slave.c:28:6:i2c_init	32	static
+../Core/Src/i2c_slave.c:42:6:HAL_I2C_ListenCpltCallback	0	static
+../Core/Src/i2c_slave.c:126:6:HAL_I2C_AddrCallback	16	static
+../Core/Src/i2c_slave.c:167:6:HAL_I2C_SlaveRxCpltCallback	0	static
+../Core/Src/i2c_slave.c:171:6:HAL_I2C_SlaveTxCpltCallback	0	static
+../Core/Src/i2c_slave.c:186:6:HAL_I2C_ErrorCallback	0	static

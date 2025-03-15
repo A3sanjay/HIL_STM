@@ -1,0 +1,4 @@
+../Core/Src/mcp2515.c:102:6:mcp2515_process_received_data	8	static
+../Core/Src/mcp2515.c:58:6:mcp2515_process_byte	0	static
+../Core/Src/mcp2515.c:21:6:mcp2515_init_reg_map	16	static
+../Core/Src/mcp2515.c:48:6:mcp2515_init	8	static

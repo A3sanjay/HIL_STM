@@ -1,0 +1,54 @@
+/*
+ * mcp2515.h
+ *
+ *  Created on: Mar 5, 2025
+ *      Author: arvin
+ */
+
+#ifndef SRC_MCP2515_H_
+#define SRC_MCP2515_H_
+
+#include <stdint.h>
+
+#include "mcp2515_defs.h"
+#include "spi_defs.h"
+#include "spi_slave.h"
+
+#define MAX_NUM_MCP2515 1
+
+#define MCP2515_SPI_RX_BUFFER_SIZE 10
+#define MCP2515_SPI_TX_BUFFER_SIZE 10
+
+#define MCP2515_SPI_PORT SPI_PORT_2
+
+typedef enum
+{
+    MCP2515_INPUT_PORT_0,
+    MCP2515_INPUT_PORT_1,
+    MCP2515_OUTPUT_PORT_0,
+    MCP2515_OUTPUT_PORT_1,
+    MCP2515_POLARITY_INVERSION_0,
+    MCP2515_POLARITY_INVERSION_1,
+    MCP2515_CONFIGURATION_0,
+    MCP2515_CONFIGURATION_1,
+    NUM_PCA_REGS
+} MCP2515_Registers;
+
+typedef struct
+{
+    SPI_Settings *spi_settings;
+} MCP2515_Settings;
+
+typedef struct
+{
+    uint8_t rx_data[MCP2515_SPI_RX_BUFFER_SIZE];
+    uint8_t tx_data[MCP2515_SPI_TX_BUFFER_SIZE];
+    MCP2515_Register_Map mcp2515_reg_map[MCP2515_NUM_REGISTERS];
+} MCP2515_Storage;
+
+void mcp2515_init_reg_map();
+void mcp2515_init(MCP2515_Settings *settings, MCP2515_Storage *storage);
+void mcp2515_process_byte(SPI_Settings *settings);
+void mcp2515_process_received_data(SPI_Settings *settings);
+
+#endif /* SRC_MCP2515_H_ */

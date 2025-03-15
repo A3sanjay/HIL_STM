@@ -1,0 +1,9 @@
+syntax = "proto2";
+
+message InitializeBoard {
+    required uint32 board_to_run = 1;
+}
+
+message Response  {
+    required uint32 message_received = 1;
+}

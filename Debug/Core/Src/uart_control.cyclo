@@ -1,0 +1,4 @@
+uart_control.c:27:6:uart_control_update_state	8
+uart_control.c:69:6:uart_control_rx_cb	1
+uart_control.c:19:6:uart_control_board_init	1
+uart_control.c:105:6:uart_control_transaction_cb	1
