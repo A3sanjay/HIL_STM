@@ -51,7 +51,7 @@ void max17261_init(MAX17261_Settings *settings, MAX17261_Storage *storage)
     settings->i2c_settings->tx_data = storage->tx_data;
     settings->i2c_settings->tx_buffer_size = MAX17261_I2C_TX_BUFFER_SIZE;
     memcpy(storage->max17261_reg_map, &initial_max17261_reg_map, sizeof(initial_max17261_reg_map));
-    settings->i2c_settings->max17261_reg_map = &(storage->max17261_reg_map);
+    settings->i2c_settings->max17261_reg_map = storage->max17261_reg_map;
     settings->i2c_settings->max17261_num_registers = MAX17261_NUM_REGISTERS;
 
     I2C_Callbacks i2c_callbacks = {.i2c_process_received_data = max17261_process_received_data, .i2c_process_address = max17261_process_address};

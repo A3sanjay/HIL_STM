@@ -40,7 +40,7 @@ void pca9555_init(PCA9555_Settings *settings, PCA9555_Storage *storage)
     settings->i2c_settings->tx_data = storage->tx_data;
     settings->i2c_settings->tx_buffer_size = PCA9555_I2C_TX_BUFFER_SIZE;
     memcpy(storage->pca9555_reg_map, &initial_pca9555_reg_map, sizeof(initial_pca9555_reg_map));
-    settings->i2c_settings->pca9555_reg_map = &(storage->pca9555_reg_map);
+    settings->i2c_settings->pca9555_reg_map = storage->pca9555_reg_map;
     settings->i2c_settings->pca9555_num_registers = PCA9555_NUM_REGISTERS;
 
     I2C_Callbacks i2c_callbacks = {.i2c_process_received_data = pca9555_process_received_data, .i2c_process_address = pca9555_process_address};
