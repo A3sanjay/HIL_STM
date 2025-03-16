@@ -1,12 +1,12 @@
 /*
- * uart_fsm_defs.h
+ * uart_control_fsm_defs.h
  *
  *  Created on: Mar 3, 2025
  *      Author: arvin
  */
 
-#ifndef INC_UART_FSM_DEFS_H_
-#define INC_UART_FSM_DEFS_H_
+#ifndef INC_UART_CONTROL_FSM_DEFS_H_
+#define INC_UART_CONTROL_FSM_DEFS_H_
 
 typedef enum
 {
@@ -17,6 +17,6 @@ typedef enum
     SETUP_CRC_BYTES,
     SETUP_END_BYTE,
     SETUP_COMPLETE
-} UART_FSM_STATES;
+} UART_CONTROL_FSM_STATES;
 
-#endif /* INC_UART_FSM_DEFS_H_ */
+#endif /* INC_UART_CONTROL_FSM_DEFS_H_ */

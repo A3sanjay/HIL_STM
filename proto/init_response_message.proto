@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+message InitializeBoard {
+    uint32 board_to_run = 1;
+}
+
+message Response {
+    uint32 message_received = 1;
+}

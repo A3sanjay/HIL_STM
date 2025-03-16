@@ -9,31 +9,38 @@
 #define INC_UART_H_
 
 #include "main.h"
-#include "uart_fsm_defs.h"
+#include "uart_control_fsm_defs.h"
 
 #include <stdint.h>
 
-// Macros for reception size in number of bytes
-#define SETUP_START_BYTE_LENGTH 1
-#define SETUP_DATA_LENGTH_BYTE_LENGTH 1
-#define SETUP_DATA_BYTES_LENGTH 100
-#define SETUP_CRC_BYTES_LENGTH 2
-#define SETUP_END_BYTE_LENGTH 1
+#define UART_TRANSMIT_TIMEOUT 5
+
+#define MAX_UART_PACKET_LENGTH 100
+
+typedef struct
+{
+    uint8_t rx_data[MAX_UART_PACKET_LENGTH];
+    uint8_t tx_data[MAX_UART_PACKET_LENGTH];
+} UART_Storage;
 
 typedef struct
 {
     UART_HandleTypeDef *huart;
-    uint8_t *start_byte;
-    uint8_t *data_length_byte;
-    uint8_t *data_bytes;
-    uint8_t *crc_bytes;
-    uint8_t *end_byte;
     uint8_t *rx_data;
+    uint8_t *tx_data;
     uint8_t bytes_to_receive;
-    void (*transaction_cp_cb)(uint8_t *data_byte);
+    uint8_t bytes_to_send;
 } UART_Settings;
 
-void uart_init(UART_Settings *settings, void (*uart_rx_it_cb)(UART_Settings *, UART_FSM_STATES *), void (*uart_state_update)(UART_Settings *, UART_FSM_STATES *));
-void uart_receive();
+typedef struct
+{
+    void (*uart_process_received_data)(UART_Settings *);
+    void (*uart_update_state)(UART_Settings *);
+    void (*transaction_cp_cb)(UART_Settings *);
+} UART_Callbacks;
+
+void uart_init(UART_Settings *settings, UART_Callbacks *callbacks);
+void uart_receive(UART_Settings *settings);
+void uart_transmit(UART_Settings *settings);
 
 #endif /* INC_UART_H_ */

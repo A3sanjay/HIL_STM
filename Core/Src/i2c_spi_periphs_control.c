@@ -11,7 +11,7 @@
 #include "pca9555.h"
 #include "max17261.h"
 
-BOARDS_TO_SIMULATE curr_board = POWER_DISTRIBUTION;
+static BOARDS_TO_SIMULATE curr_board = NO_BOARD;
 
 static PCA9555_Settings pca9555_settings[MAX_NUM_PCA9555];
 static PCA9555_Storage pca9555_storage[MAX_NUM_PCA9555];
@@ -56,6 +56,11 @@ void board_control_init()
         max17261_settings[0].i2c_settings = &i2c_settings[0];
         max17261_init(&max17261_settings[0], &max17261_storage[0]);
     }
+}
+
+void set_board(BOARDS_TO_SIMULATE board)
+{
+    curr_board = board;
 }
 
 void switch_simulated_board()

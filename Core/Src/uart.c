@@ -7,40 +7,44 @@
 
 #include "main.h"
 #include "uart.h"
-#include "uart_fsm_defs.h"
+#include "uart_control_fsm_defs.h"
 
 #include <string.h>
 #include <stdbool.h>
 
-static volatile UART_FSM_STATES uart_fsm_state;
 static volatile UART_Settings uart_settings;
+static UART_Storage uart_storage;
+static UART_Callbacks uart_callbacks;
 
-static void (*uart_process_received_data)(UART_Settings *, UART_FSM_STATES *);
-static void (*uart_update_state)(UART_Settings *, UART_FSM_STATES *);
-
-void uart_init(UART_Settings *settings, void (*uart_rx_it_cb)(UART_Settings *, UART_FSM_STATES *), void (*uart_state_update)(UART_Settings *, UART_FSM_STATES *))
+void uart_init(UART_Settings *settings, UART_Callbacks *callbacks)
 {
+    settings->rx_data = uart_storage.rx_data;
+    settings->tx_data = uart_storage.tx_data;
+    settings->bytes_to_receive = 0;
+    settings->bytes_to_send = 0;
+
     memcpy(&uart_settings, settings, sizeof(UART_Settings));
 
-    uart_process_received_data = uart_rx_it_cb;
-    uart_update_state = uart_state_update;
-
-    uart_fsm_state = UART_IDLE;
+    uart_callbacks.uart_process_received_data = callbacks->uart_process_received_data;
+    uart_callbacks.uart_update_state = callbacks->uart_update_state;
+    uart_callbacks.transaction_cp_cb = callbacks->transaction_cp_cb;
 }
 
-void uart_receive()
+void uart_receive(UART_Settings *settings)
 {
-    uint8_t num_bytes_to_receive = uart_settings.bytes_to_receive;
-    uint8_t *rx_buffer = uart_settings.rx_data;
+    uint8_t num_bytes_to_receive = settings->bytes_to_receive;
+    uint8_t *rx_buffer = settings->rx_data;
 
-    if (num_bytes_to_receive != 0)
-    {
-        HAL_UART_Receive_IT(uart_settings.huart, rx_buffer, num_bytes_to_receive);
-    }
+    HAL_UART_Receive_IT(settings->huart, rx_buffer, num_bytes_to_receive);
+}
+
+void uart_transmit(UART_Settings *settings)
+{
+    HAL_UART_Transmit(settings->huart, settings->tx_data, settings->bytes_to_send, UART_TRANSMIT_TIMEOUT);
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-    uart_process_received_data(&uart_settings, &uart_fsm_state);
-    uart_update_state(&uart_settings, &uart_fsm_state);
+    uart_callbacks.uart_process_received_data(&uart_settings);
+    uart_callbacks.uart_update_state(&uart_settings);
 }

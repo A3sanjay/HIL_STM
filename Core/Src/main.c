@@ -26,10 +26,13 @@
 #include "pca9555.h"
 #include "i2c_slave.h"
 #include "spi_slave.h"
+#include "uart_control.h"
 #include <pb_encode.h>
 #include <pb_decode.h>
-#include "message.pb.h"
+#include "init_response_message.pb.h"
+#include "update_event_message.pb.h"
 
+#include <stdint.h>
 #include <stdbool.h>
 /* USER CODE END Includes */
 
@@ -76,9 +79,9 @@ static void MX_USART1_UART_Init(void);
 /* USER CODE END 0 */
 
 /**
-  * @brief  The application entry point.
-  * @retval int
-  */
+ * @brief  The application entry point.
+ * @retval int
+ */
 int main(void)
 {
   /* USER CODE BEGIN 1 */
@@ -107,59 +110,51 @@ int main(void)
   MX_TIM3_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-  I2C_Settings max17261_i2c_settings = {.hi2c = NULL, .i2c_slave_address = MAX17261_I2C_ADDRESS, .i2c_slave_id = I2C_PORT_1, .htim = NULL};
-  MAX17261_Settings settings = {.i2c_settings = &max17261_i2c_settings};
-  MAX17261_Storage storage;
-  max17261_init_reg_map();
-  max17261_init(&settings, &storage);
+  //  I2C_Settings max17261_i2c_settings = {.hi2c = NULL, .i2c_slave_address = MAX17261_I2C_ADDRESS, .i2c_slave_id = I2C_PORT_1, .htim = NULL};
+  //  MAX17261_Settings settings = {.i2c_settings = &max17261_i2c_settings};
+  //  MAX17261_Storage storage;
+  //  max17261_init_reg_map();
+  //  max17261_init(&settings, &storage);
+  //
+  //  I2C_Settings pca9555_i2c_settings = {.hi2c = &hi2c1, .i2c_slave_address = PCA9555_I2C_ADDRESS, .i2c_slave_id = I2C_PORT_2, .htim = &htim3};
+  //  PCA9555_Settings pca9555_settings = {.i2c_settings = &pca9555_i2c_settings};
+  //  PCA9555_Storage pca9555_storage;
+  //  pca9555_init_reg_map();
+  //  pca9555_init(&pca9555_settings, &pca9555_storage);
 
-  I2C_Settings pca9555_i2c_settings = {.hi2c = &hi2c1, .i2c_slave_address = PCA9555_I2C_ADDRESS, .i2c_slave_id = I2C_PORT_2, .htim = &htim3};
-  PCA9555_Settings pca9555_settings = {.i2c_settings = &pca9555_i2c_settings};
-  PCA9555_Storage pca9555_storage;
-  pca9555_init_reg_map();
-  pca9555_init(&pca9555_settings, &pca9555_storage);
+  UART_Settings uart_settings;
+  UART_Control uart_control = {.huart = &huart1, .uart_settings = &uart_settings};
+  uart_control_board_init(&uart_control);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  uint8_t buffer[128];
-  size_t message_length;
-  bool status;
 
   while (1)
   {
     /* USER CODE END WHILE */
-
     /* USER CODE BEGIN 3 */
-    //    Response response = Response_init_zero;
-    //    pb_ostream_t stream = pb_ostream_from_buffer(buffer, sizeof(buffer));
-    //    response.message_received = 500;
-    //    status = pb_encode(&stream, Response_fields, &response);
-    //    message_length = stream.bytes_written;
-    //
-    //    HAL_UART_Transmit(&huart1, buffer, message_length, 1000);
-    //    HAL_Delay(1000);
   }
   /* USER CODE END 3 */
 }
 
 /**
-  * @brief System Clock Configuration
-  * @retval None
-  */
+ * @brief System Clock Configuration
+ * @retval None
+ */
 void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
   /** Configure the main internal regulator output voltage
-  */
+   */
   __HAL_RCC_PWR_CLK_ENABLE();
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE2);
 
   /** Initializes the RCC Oscillators according to the specified parameters
-  * in the RCC_OscInitTypeDef structure.
-  */
+   * in the RCC_OscInitTypeDef structure.
+   */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
@@ -174,9 +169,8 @@ void SystemClock_Config(void)
   }
 
   /** Initializes the CPU, AHB and APB buses clocks
-  */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+   */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
@@ -189,10 +183,10 @@ void SystemClock_Config(void)
 }
 
 /**
-  * @brief I2C1 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief I2C1 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_I2C1_Init(void)
 {
 
@@ -219,14 +213,13 @@ static void MX_I2C1_Init(void)
   /* USER CODE BEGIN I2C1_Init 2 */
 
   /* USER CODE END I2C1_Init 2 */
-
 }
 
 /**
-  * @brief SPI2 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief SPI2 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_SPI2_Init(void)
 {
 
@@ -249,7 +242,7 @@ static void MX_SPI2_Init(void)
   PB12   ------> SPI2_NSS
   PB13   ------> SPI2_SCK
   */
-  GPIO_InitStruct.Pin = LL_GPIO_PIN_2|LL_GPIO_PIN_3;
+  GPIO_InitStruct.Pin = LL_GPIO_PIN_2 | LL_GPIO_PIN_3;
   GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
   GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
   GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
@@ -257,7 +250,7 @@ static void MX_SPI2_Init(void)
   GPIO_InitStruct.Alternate = LL_GPIO_AF_5;
   LL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  GPIO_InitStruct.Pin = LL_GPIO_PIN_12|LL_GPIO_PIN_13;
+  GPIO_InitStruct.Pin = LL_GPIO_PIN_12 | LL_GPIO_PIN_13;
   GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
   GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
   GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
@@ -266,7 +259,7 @@ static void MX_SPI2_Init(void)
   LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* SPI2 interrupt Init */
-  NVIC_SetPriority(SPI2_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),0, 0));
+  NVIC_SetPriority(SPI2_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 0));
   NVIC_EnableIRQ(SPI2_IRQn);
 
   /* USER CODE BEGIN SPI2_Init 1 */
@@ -286,14 +279,13 @@ static void MX_SPI2_Init(void)
   LL_SPI_SetStandard(SPI2, LL_SPI_PROTOCOL_MOTOROLA);
   /* USER CODE BEGIN SPI2_Init 2 */
   /* USER CODE END SPI2_Init 2 */
-
 }
 
 /**
-  * @brief TIM3 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief TIM3 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_TIM3_Init(void)
 {
 
@@ -331,14 +323,13 @@ static void MX_TIM3_Init(void)
   /* USER CODE BEGIN TIM3_Init 2 */
 
   /* USER CODE END TIM3_Init 2 */
-
 }
 
 /**
-  * @brief USART1 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief USART1 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_USART1_UART_Init(void)
 {
 
@@ -364,14 +355,13 @@ static void MX_USART1_UART_Init(void)
   /* USER CODE BEGIN USART1_Init 2 */
 
   /* USER CODE END USART1_Init 2 */
-
 }
 
 /**
-  * @brief USART2 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief USART2 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_USART2_UART_Init(void)
 {
 
@@ -397,19 +387,18 @@ static void MX_USART2_UART_Init(void)
   /* USER CODE BEGIN USART2_Init 2 */
 
   /* USER CODE END USART2_Init 2 */
-
 }
 
 /**
-  * @brief GPIO Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief GPIO Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_GPIO_Init(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
-/* USER CODE BEGIN MX_GPIO_Init_1 */
-/* USER CODE END MX_GPIO_Init_1 */
+  /* USER CODE BEGIN MX_GPIO_Init_1 */
+  /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOC_CLK_ENABLE();
@@ -433,17 +422,17 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
 
-/* USER CODE BEGIN MX_GPIO_Init_2 */
-/* USER CODE END MX_GPIO_Init_2 */
+  /* USER CODE BEGIN MX_GPIO_Init_2 */
+  /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
 /* USER CODE END 4 */
 
 /**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
+ * @brief  This function is executed in case of error occurrence.
+ * @retval None
+ */
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
@@ -455,14 +444,14 @@ void Error_Handler(void)
   /* USER CODE END Error_Handler_Debug */
 }
 
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
 /**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
+ * @brief  Reports the name of the source file and the source line number
+ *         where the assert_param error has occurred.
+ * @param  file: pointer to the source file name
+ * @param  line: assert_param error line source number
+ * @retval None
+ */
 void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */

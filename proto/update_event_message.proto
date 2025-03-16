@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+message I2CWriteEvent {
+    uint32 peripheral_to_update = 1;
+    uint32 i2c_address = 2;
+    uint32 register_to_update = 3;
+    uint32 value_to_write = 4;
+}
+
+message SPIWriteEvent {
+    uint32 peripheral_to_update = 1;
+    repeated uint32 registers_to_update = 2;
+    repeated uint32 values_to_write = 3;
+}
