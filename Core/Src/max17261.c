@@ -9,13 +9,29 @@
 #include <string.h>
 #include <stdbool.h>
 
+#include "main.h"
 #include "max17261.h"
 #include "i2c_slave.h"
+#include "proto_processing.h"
+#include "uart_control.h"
+#include "update_event_message.pb.h"
+
+extern UART_HandleTypeDef huart1;
 
 static MAX17261_Register_Map initial_max17261_reg_map[MAX17261_NUM_REGISTERS] = {0};
 
-static MAX17261_Settings max17261_settings;
-static MAX17261_Storage max17261_storage;
+// Send an I2C Write Update Event message for MAX17261 over UART and encode using Proto
+static void prv_max17261_send_i2c_write_update_event(uint8_t register_to_update, uint16_t value_to_write)
+{
+    I2C_Write_Update_Event i2c_update_event = {.peripheral_to_update = MAX17261_I2C_WRITE_EVENT, .i2c_address = MAX17261_I2C_ADDRESS, .register_to_update = register_to_update, .value_to_write = value_to_write};
+
+    uint8_t buffer_to_encode[MIN_I2C_WRITE_UPDATE_EVENT_BUFFER_SIZE];
+    Proto_Encode_Storage storage = {.buffer_to_encode = buffer_to_encode, sizeof(buffer_to_encode)};
+    proto_process_encode_i2c_write_update_event(&i2c_update_event, &storage);
+
+    UART_Settings settings = {&huart1, .tx_data = buffer_to_encode, .bytes_to_send = storage.encoded_buffer_length};
+    uart_control_tx(&settings);
+}
 
 void max17261_init_reg_map()
 {
@@ -44,6 +60,7 @@ void max17261_init_reg_map()
     }
 }
 
+// TODO: Revisit the structure of what goes in I2C layer and what goes in device driver layer
 void max17261_init(MAX17261_Settings *settings, MAX17261_Storage *storage)
 {
     settings->i2c_settings->rx_data = storage->rx_data;
@@ -83,6 +100,7 @@ void max17261_process_received_data(I2C_Settings *settings, I2C_FSM *i2c_fsm)
             if (reg_to_write != MAX17261_MODEL_I_CFG)
             {
                 settings->max17261_reg_map[reg_to_write].register_value = data_to_write;
+                // prv_max17261_send_i2c_write_update_event(reg_to_write, data_to_write);
             }
         }
 

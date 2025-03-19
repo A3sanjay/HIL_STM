@@ -10,8 +10,10 @@
 
 #include <stdint.h>
 
+#include "main.h"
 #include "uart.h"
 #include "uart_control_fsm_defs.h"
+#include "free_rtos_support.h"
 
 #define START_BYTE 0xFC
 #define INVALID_BYTE 0x00
@@ -33,11 +35,13 @@ typedef struct
     UART_Settings *uart_settings;
     uint8_t data_length;
     uint8_t raw_data[MAX_UART_PACKET_LENGTH];
+    TaskHandle_t *uart_rx_cp_notify_task;
 } UART_Control;
 
-void uart_control_board_init(UART_Control *uart_control);
+void uart_control_rx_init(UART_Control *control, void (*uart_receive_completed_callback)(UART_Control *control));
+void uart_control_rx_start(UART_Control *control);
 void uart_control_update_state(UART_Settings *settings);
 void uart_control_rx_cb(UART_Settings *settings);
-void uart_control_handle_setup(UART_Settings *settings);
+void uart_control_tx(UART_Settings *settings);
 
 #endif /* INC_UART_CONTROL_H_ */

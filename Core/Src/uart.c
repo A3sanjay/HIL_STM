@@ -30,12 +30,12 @@ void uart_init(UART_Settings *settings, UART_Callbacks *callbacks)
     uart_callbacks.transaction_cp_cb = callbacks->transaction_cp_cb;
 }
 
-void uart_receive(UART_Settings *settings)
+void uart_receive()
 {
-    uint8_t num_bytes_to_receive = settings->bytes_to_receive;
-    uint8_t *rx_buffer = settings->rx_data;
+    uint8_t num_bytes_to_receive = uart_settings.bytes_to_receive;
+    uint8_t *rx_buffer = uart_settings.rx_data;
 
-    HAL_UART_Receive_IT(settings->huart, rx_buffer, num_bytes_to_receive);
+    HAL_UART_Receive_IT(uart_settings.huart, rx_buffer, num_bytes_to_receive);
 }
 
 void uart_transmit(UART_Settings *settings)

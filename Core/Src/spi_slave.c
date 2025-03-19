@@ -96,9 +96,10 @@ void spi2_transfererror_cb(SPI_TypeDef *spi_handle)
 	// spi_fsm_state[spi_index].spi_slave_state = SPI_ERROR;
 }
 
-// Timer to re-enable listening for SPI messages
+// Timer to re-enable listening for SPI messages and handle the incrementing of timer
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
+	// TODO: Fix the timer handle check
 	// Check for end of SPI Rx Transaction
 	if (htim == &htim3)
 	{
@@ -116,5 +117,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 				spi_fsm_state[spi_index].spi_slave_state = SPI_IDLE;
 			}
 		}
+	}
+	else if (htim->Instance == TIM1)
+	{
+		HAL_IncTick();
 	}
 }

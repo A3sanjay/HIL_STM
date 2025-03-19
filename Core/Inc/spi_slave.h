@@ -18,6 +18,8 @@ typedef enum
 {
     SPI_PORT_1,
     SPI_PORT_2,
+    SPI_PORT_3,
+    SPI_PORT_4,
     NUM_SPI_PORTS
 } SPI_PORTS;
 

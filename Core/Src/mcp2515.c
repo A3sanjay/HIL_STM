@@ -15,9 +15,6 @@
 
 static MCP2515_Register_Map initial_mcp2515_reg_map[MCP2515_NUM_REGISTERS] = {0};
 
-static MCP2515_Settings mcp2515_settings;
-static MCP2515_Storage mcp2515_storage;
-
 void mcp2515_init_reg_map()
 {
     for (uint8_t i = 0; i < MCP2515_NUM_REGISTERS; i++)
@@ -45,14 +42,22 @@ void mcp2515_init_reg_map()
     }
 }
 
+// TODO: Revisit the structure of what goes in SPI layer and what goes in device driver layer
 void mcp2515_init(MCP2515_Settings *settings, MCP2515_Storage *storage)
 {
     memcpy(storage->mcp2515_reg_map, initial_mcp2515_reg_map, sizeof(initial_mcp2515_reg_map));
 
-    memcpy(&mcp2515_settings, settings, sizeof(mcp2515_settings));
-    memcpy(&mcp2515_storage, storage, sizeof(mcp2515_storage));
+    settings->spi_settings->rx_data = storage->rx_data;
+    settings->spi_settings->rx_index = 0;
+    settings->spi_settings->rx_buffer_size = MCP2515_SPI_RX_BUFFER_SIZE;
+    settings->spi_settings->tx_data = storage->tx_data;
+    settings->spi_settings->tx_index = 0;
+    settings->spi_settings->tx_buffer_size = MCP2515_SPI_TX_BUFFER_SIZE;
+    settings->spi_settings->mcp2515_reg_map = storage->mcp2515_reg_map;
+    settings->spi_settings->mcp2515_num_registers = MCP2515_NUM_REGISTERS;
 
-    spi_init(mcp2515_settings.spi_settings, MCP2515, mcp2515_process_received_data, mcp2515_process_byte);
+    // TODO: Create a callbacks struct for the device callbacks instead of passing in one by one
+    spi_init(settings->spi_settings, MCP2515, mcp2515_process_received_data, mcp2515_process_byte);
 }
 
 void mcp2515_process_byte(SPI_Settings *settings)

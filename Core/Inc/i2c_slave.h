@@ -49,6 +49,7 @@ typedef struct
     uint8_t rx_buffer_size;
     uint8_t *tx_data;
     uint8_t tx_buffer_size;
+    // TODO: Move to relevant storage structs
     PCA9555_Register_Map *pca9555_reg_map;
     uint8_t pca9555_num_registers;
     MAX17261_Register_Map *max17261_reg_map;

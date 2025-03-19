@@ -40,7 +40,7 @@ typedef struct
 } UART_Callbacks;
 
 void uart_init(UART_Settings *settings, UART_Callbacks *callbacks);
-void uart_receive(UART_Settings *settings);
+void uart_receive();
 void uart_transmit(UART_Settings *settings);
 
 #endif /* INC_UART_H_ */

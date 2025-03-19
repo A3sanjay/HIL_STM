@@ -9,10 +9,30 @@
 #include <string.h>
 #include <stdbool.h>
 
+#include "main.h"
 #include "pca9555.h"
 #include "i2c_slave.h"
+#include "proto_processing.h"
+#include "uart_control.h"
+#include "update_event_message.pb.h"
+
+extern UART_HandleTypeDef huart1;
 
 static PCA9555_Register_Map initial_pca9555_reg_map[PCA9555_NUM_REGISTERS] = {0};
+
+// Send an I2C Write Update Event message for PCA9555 over UART and encode using Proto
+static void prv_pca9555_send_i2c_write_update_event(uint8_t register_to_update, uint8_t value_to_write)
+{
+    // Encode using Proto and send over UART
+    I2C_Write_Update_Event i2c_update_event = {.peripheral_to_update = PCA9555_I2C_WRITE_EVENT, .i2c_address = PCA9555_I2C_ADDRESS, .register_to_update = register_to_update, .value_to_write = value_to_write};
+
+    uint8_t buffer_to_encode[MIN_I2C_WRITE_UPDATE_EVENT_BUFFER_SIZE];
+    Proto_Encode_Storage storage = {.buffer_to_encode = buffer_to_encode, sizeof(buffer_to_encode)};
+    proto_process_encode_i2c_write_update_event(&i2c_update_event, &storage);
+
+    UART_Settings settings = {&huart1, .tx_data = buffer_to_encode, .bytes_to_send = storage.encoded_buffer_length};
+    uart_control_tx(&settings);
+}
 
 void pca9555_init_reg_map()
 {
@@ -33,13 +53,15 @@ void pca9555_init_reg_map()
     }
 }
 
+// TODO: Revisit the structure of what goes in I2C layer and what goes in device driver layer
 void pca9555_init(PCA9555_Settings *settings, PCA9555_Storage *storage)
 {
+    memcpy(storage->pca9555_reg_map, &initial_pca9555_reg_map, sizeof(initial_pca9555_reg_map));
+
     settings->i2c_settings->rx_data = storage->rx_data;
     settings->i2c_settings->rx_buffer_size = PCA9555_I2C_RX_BUFFER_SIZE;
     settings->i2c_settings->tx_data = storage->tx_data;
     settings->i2c_settings->tx_buffer_size = PCA9555_I2C_TX_BUFFER_SIZE;
-    memcpy(storage->pca9555_reg_map, &initial_pca9555_reg_map, sizeof(initial_pca9555_reg_map));
     settings->i2c_settings->pca9555_reg_map = storage->pca9555_reg_map;
     settings->i2c_settings->pca9555_num_registers = PCA9555_NUM_REGISTERS;
 
@@ -67,6 +89,7 @@ void pca9555_process_received_data(I2C_Settings *settings, I2C_FSM *i2c_fsm)
             uint8_t reg_to_write = settings->rx_data[0];
             uint8_t data_to_write = settings->rx_data[1];
             settings->pca9555_reg_map[reg_to_write].register_value = data_to_write;
+            // prv_pca9555_send_i2c_write_update_event(reg_to_write, data_to_write);
         }
 
         i2c_fsm->i2c_slave_select = I2C_NO_SLAVE;
