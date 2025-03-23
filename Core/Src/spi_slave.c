@@ -5,22 +5,23 @@
  *      Author: arvin
  */
 
+#include <stdint.h>
+#include <stdbool.h>
+#include <string.h>
+
 #include "main.h"
 #include "spi_defs.h"
 #include "spi_slave.h"
 #include "spi_slave_fsm_defs.h"
 
-#include <stdbool.h>
-#include <string.h>
-
-static volatile SPI_FSM spi_fsm_state[NUM_SPI_PORTS];
-static volatile SPI_Settings spi_settings[NUM_SPI_PORTS];
+static volatile SPI_FSM spi_fsm_state[NUM_SPI_SLAVE_PORTS];
+static volatile SPI_Settings spi_settings[NUM_SPI_SLAVE_PORTS];
 static void (*spi_process_byte)(SPI_Settings *);
 static void (*spi_process_received_data)(SPI_Settings *);
 
 extern TIM_HandleTypeDef htim3;
 
-void spi_init(SPI_Settings *settings, SPI_SLAVE_SELECT slave_select, void (*spi_rx_process_cb)(SPI_Settings *), void (*spi_byte_process_cb)(SPI_Settings *))
+void spi_slave_init(SPI_Settings *settings, SPI_SLAVE_SELECT slave_select, void (*spi_rx_process_cb)(SPI_Settings *), void (*spi_byte_process_cb)(SPI_Settings *))
 {
 	uint8_t spi_index = settings->spi_port;
 	memcpy(&(spi_settings[spi_index]), settings, sizeof(SPI_Settings));

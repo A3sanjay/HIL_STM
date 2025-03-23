@@ -57,7 +57,7 @@ void mcp2515_init(MCP2515_Settings *settings, MCP2515_Storage *storage)
     settings->spi_settings->mcp2515_num_registers = MCP2515_NUM_REGISTERS;
 
     // TODO: Create a callbacks struct for the device callbacks instead of passing in one by one
-    spi_init(settings->spi_settings, MCP2515, mcp2515_process_received_data, mcp2515_process_byte);
+    spi_slave_init(settings->spi_settings, MCP2515, mcp2515_process_received_data, mcp2515_process_byte);
 }
 
 void mcp2515_process_byte(SPI_Settings *settings)
