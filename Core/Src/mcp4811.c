@@ -22,6 +22,12 @@ static void prv_mcp4811_set_enable(uint16_t *tx_buffer)
     *tx_buffer |= val_to_set;
 }
 
+static void prv_mcp4811_set_disable(uint16_t *tx_buffer) {
+    // Set disable bit
+    uint16_t val_to_set = EN_MSG_FALSE << EN_MSG_BIT_POS;
+    *tx_buffer |= val_to_set;
+}
+
 static void prv_mcp4811_set_gain_selection_1x(uint16_t *tx_buffer)
 {
     uint16_t val_to_set = GAIN_1X_BIT_VAL << GA_BIT_POS;
@@ -46,10 +52,12 @@ static void prv_mcp4811_set_shutdown_device_off(uint16_t *tx_buffer)
     *tx_buffer |= val_to_set;
 }
 
-static void prv_mcp4811_convert_voltage_to_output(float desired_voltage, float *output)
+static void prv_mcp4811_convert_voltage_to_output(float desired_voltage, float *output, uint16_t *tx_buffer)
 {
     if (desired_voltage < 0 || desired_voltage > MAX_OUTPUT_VOLTAGE)
     {
+    	// Set the enable bit to 0, the desired voltage is invalid, so maintain the DAC's current output voltage
+    	prv_mcp4811_set_disable(tx_buffer);
         return;
     }
 
@@ -78,14 +86,14 @@ void mcp4811_set_voltage(MCP4811_Settings *settings, MCP4811_Storage *storage, f
     prv_mcp4811_set_enable(&tx_data);
 
     float output = 0;
-    prv_mcp4811_convert_voltage_to_output(voltage, &output);
+    prv_mcp4811_convert_voltage_to_output(voltage, &output, &tx_data);
 
     // Set voltage according to input
     if (voltage > V_REF)
     {
         // Set the Gain Selection to 2x
         prv_mcp4811_set_gain_selection_2x(&tx_data);
-        output *= 2;
+        output /= 2;
     }
     else
     {

@@ -31,7 +31,7 @@ void spi_master_transmit_buffer(SPI_Settings *settings, GPIO_Pin *cs_pin)
     // Drive the CS pin low, transmit the message, then drive it high again
     HAL_GPIO_WritePin(cs_pin->gpio_port, cs_pin->gpio_pin, GPIO_PIN_RESET);
 
-    for (uint8_t i = 0; i < settings->bytes_to_send; i++)
+    for (int8_t i = settings->bytes_to_send - 1; i >= 0; i--)
     {
         while (!LL_SPI_IsActiveFlag_TXE(settings->spi_handle))
         {
