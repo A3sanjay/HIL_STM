@@ -12,7 +12,7 @@
 #include <string.h>
 #include <stdbool.h>
 
-static volatile UART_Settings uart_settings;
+static volatile UART_Settings *uart_settings;
 static UART_Storage uart_storage;
 static UART_Callbacks uart_callbacks;
 
@@ -23,7 +23,7 @@ void uart_init(UART_Settings *settings, UART_Callbacks *callbacks)
     settings->bytes_to_receive = 0;
     settings->bytes_to_send = 0;
 
-    memcpy(&uart_settings, settings, sizeof(UART_Settings));
+    uart_settings = settings;
 
     uart_callbacks.uart_process_received_data = callbacks->uart_process_received_data;
     uart_callbacks.uart_update_state = callbacks->uart_update_state;
@@ -32,10 +32,10 @@ void uart_init(UART_Settings *settings, UART_Callbacks *callbacks)
 
 void uart_receive()
 {
-    uint8_t num_bytes_to_receive = uart_settings.bytes_to_receive;
-    uint8_t *rx_buffer = uart_settings.rx_data;
+    uint8_t num_bytes_to_receive = uart_settings->bytes_to_receive;
+    uint8_t *rx_buffer = uart_settings->rx_data;
 
-    HAL_UART_Receive_IT(uart_settings.huart, rx_buffer, num_bytes_to_receive);
+    HAL_UART_Receive_IT(uart_settings->huart, rx_buffer, num_bytes_to_receive);
 }
 
 void uart_transmit(UART_Settings *settings)
@@ -45,6 +45,6 @@ void uart_transmit(UART_Settings *settings)
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-    uart_callbacks.uart_process_received_data(&uart_settings);
-    uart_callbacks.uart_update_state(&uart_settings);
+    uart_callbacks.uart_process_received_data(uart_settings);
+    uart_callbacks.uart_update_state(uart_settings);
 }

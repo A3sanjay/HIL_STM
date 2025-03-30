@@ -50,7 +50,7 @@ void board_control_init_comms(void *params)
 
     // Run UART setup loop and wait for task notification indicating that the reception is complete
     UART_Settings uart_settings;
-    UART_Control uart_control = {.huart = &huart1, .uart_settings = &uart_settings, .uart_rx_cp_notify_task = control->board_control_task};
+    UART_Control uart_control = {.huart = control->huart, .uart_settings = &uart_settings, .uart_rx_cp_notify_task = control->board_control_task};
     uart_control_rx_init(&uart_control, board_control_setup_complete);
     uart_control_rx_start(&uart_control);
 

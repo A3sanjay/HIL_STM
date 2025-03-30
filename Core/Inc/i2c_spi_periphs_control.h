@@ -24,6 +24,7 @@
 typedef struct
 {
     TaskHandle_t *board_control_task;
+    UART_HandleTypeDef *huart;
 } Board_Control;
 
 typedef enum

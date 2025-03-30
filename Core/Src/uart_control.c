@@ -26,6 +26,8 @@ void uart_control_rx_init(UART_Control *control, void (*uart_receive_completed_c
 {
     memcpy(&uart_control, control, sizeof(UART_Control));
 
+    uart_control.uart_settings->huart = control->huart;
+
     UART_Callbacks cbs = {.uart_process_received_data = uart_control_rx_cb, .uart_update_state = uart_control_update_state, .transaction_cp_cb = NULL};
     uart_init(uart_control.uart_settings, &cbs);
 
