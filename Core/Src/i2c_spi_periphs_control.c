@@ -16,6 +16,7 @@
 #include "pca9555.h"
 #include "max17261.h"
 #include "mcp2515.h"
+#include "mcp4811.h"
 #include "uart_control.h"
 #include "proto_processing.h"
 #include "set_board_response.pb.h"
@@ -39,6 +40,8 @@ static MCP2515_Storage mcp2515_storage[MAX_I2C_SLAVES_TO_SIMULATE];
 static I2C_Settings i2c_settings[MAX_I2C_SLAVES_TO_SIMULATE];
 static SPI_Settings spi_settings[MAX_SPI_SLAVES_TO_SIMULATE];
 
+static UART_Control uart_control;
+
 void board_control_init(Board_Control *control)
 {
     xTaskCreate(board_control_init_comms, "Board Simulation Init Task", NORMAL_STACK_DEPTH, (void *)control, NORMAL_PRIORITY, control->board_control_task);
@@ -50,17 +53,34 @@ void board_control_init_comms(void *params)
 
     // Run UART setup loop and wait for task notification indicating that the reception is complete
     UART_Settings uart_settings;
-    UART_Control uart_control = {.huart = control->huart, .uart_settings = &uart_settings, .uart_rx_cp_notify_task = control->board_control_task};
+    uart_control.huart = control->huart;
+    uart_control.uart_settings = &uart_settings;
+    uart_control.uart_rx_cp_notify_task = control->board_control_task;
     uart_control_rx_init(&uart_control, board_control_setup_complete);
     uart_control_rx_start(&uart_control);
 
-    ulTaskNotifyTakeIndexed(TASK_NOTIFICATION_INDEX, pdTRUE, BLOCK_INDEFINITELY);
+    ulTaskNotifyTake(TRUE, BLOCK_INDEFINITELY);
 
     InitializeBoard board;
     Proto_Decode_Storage storage = {.buffer_to_decode = uart_control.raw_data, .buffer_to_decode_length = uart_control.data_length, .decoded_output = (void *)&board};
     proto_process_decode_board_init(&storage);
 
-    board_control_start_simulation(board.board_to_run);
+    // Verify validity of input, send acknowledgement message back to RPi and start simulation of chosen board
+    BOARDS_TO_SIMULATE board_to_run = board.board_to_run;
+    if (NO_BOARD < board_to_run < NUM_VALID_BOARDS)
+    {
+        uint8_t buffer_to_encode[MIN_BOARD_RESPONSE_BUFFER_SIZE];
+        Board_Response response = {.acknowledgement = BOARD_RESPONSE_MESSAGE_RECEIVED};
+        Proto_Encode_Storage storage = {.buffer_to_encode = buffer_to_encode, .buffer_to_encode_length = sizeof(buffer_to_encode)};
+        proto_process_encode_board_response(&response, &storage);
+
+        uart_control_tx_add_end_line(buffer_to_encode, storage.encoded_buffer_length);
+        uart_settings.tx_data = buffer_to_encode;
+        uart_settings.bytes_to_send = storage.encoded_buffer_length + 1;
+        uart_control_tx(&uart_settings);
+
+        board_control_start_simulation(board.board_to_run);
+    }
 }
 
 void board_control_start_simulation(BOARDS_TO_SIMULATE board)
@@ -83,6 +103,15 @@ void board_control_start_simulation(BOARDS_TO_SIMULATE board)
         i2c_settings[1].i2c_slave_id = I2C_PORT_2;
         pca9555_settings[1].i2c_settings = &i2c_settings[1];
         pca9555_init(&pca9555_settings[1], &pca9555_storage[1]);
+
+        // Init one DAC on SPI3 and set voltage output to PD default
+        SPI_Settings mcp4811_spi_settings = {.spi_handle = SPI3, .spi_port = SPI_PORT_3};
+        GPIO_Pin mcp4811_cs_pin = {.gpio_port = SPI3_CS_GPIO_Port, .gpio_pin = SPI3_CS_Pin};
+        MCP4811_Settings mcp4811_settings = {.spi_settings = &mcp4811_spi_settings, .cs_pin = &mcp4811_cs_pin};
+        MCP4811_Storage mcp4811_storage;
+        mcp4811_init(&mcp4811_settings, &mcp4811_storage);
+        float voltage_to_set = POWER_DISTRIBUTION_ANALOG_SIGNAL_DEFAULT_VOLTAGE;
+        mcp4811_set_voltage(&mcp4811_settings, &mcp4811_storage, voltage_to_set);
     }
     else if (board == CENTRE_CONSOLE)
     {
@@ -131,6 +160,8 @@ void board_control_start_simulation(BOARDS_TO_SIMULATE board)
 
 void board_control_setup_complete(UART_Control *control)
 {
-    // Sends the data to the queue
-    vTaskNotifyGiveIndexedFromISR(*(control->uart_rx_cp_notify_task), TASK_NOTIFICATION_INDEX, NULL);
+    // Updates data and sends a task notification to activate main HIL simulation (consider using a queue)
+    memcpy(uart_control.raw_data, control->raw_data, control->data_length);
+    uart_control.data_length = control->data_length;
+    vTaskNotifyGiveFromISR(*(control->uart_rx_cp_notify_task), NULL);
 }

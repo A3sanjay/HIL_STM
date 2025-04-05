@@ -29,6 +29,7 @@ static void prv_max17261_send_i2c_write_update_event(uint8_t register_to_update,
     Proto_Encode_Storage storage = {.buffer_to_encode = buffer_to_encode, sizeof(buffer_to_encode)};
     proto_process_encode_i2c_write_update_event(&i2c_update_event, &storage);
 
+    uart_control_tx_add_end_line(buffer_to_encode, storage.encoded_buffer_length);
     UART_Settings settings = {&huart1, .tx_data = buffer_to_encode, .bytes_to_send = storage.encoded_buffer_length};
     uart_control_tx(&settings);
 }

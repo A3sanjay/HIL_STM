@@ -128,3 +128,9 @@ void uart_control_tx(UART_Settings *settings)
 {
     uart_transmit(settings);
 }
+
+void uart_control_tx_add_end_line(uint8_t *buffer, uint8_t buffer_length)
+{
+    // Add end line character as the very last character in the tx buffer, as the RPi needs the character to read Serial
+    buffer[buffer_length] = END_LINE_CHARACTER;
+}

@@ -9,6 +9,7 @@
 #include "uart.h"
 #include "uart_control_fsm_defs.h"
 
+#include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
 

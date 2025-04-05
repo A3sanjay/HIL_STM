@@ -21,6 +21,10 @@
 
 #define TASK_NOTIFICATION_INDEX 1
 
+// TODO: Update for all simulation boards with reasonable values from 0V - 4V (DAC range) for the signal that the board receives
+#define NUM_POWER_DISTRIBUTION_ANALOG_SIGNALS 1
+#define POWER_DISTRIBUTION_ANALOG_SIGNAL_DEFAULT_VOLTAGE 2.5F
+
 typedef struct
 {
     TaskHandle_t *board_control_task;
@@ -33,7 +37,8 @@ typedef enum
     POWER_DISTRIBUTION,
     CENTRE_CONSOLE,
     MCI,
-    BMS
+    BMS,
+    NUM_VALID_BOARDS
 } BOARDS_TO_SIMULATE;
 
 void board_control_init(Board_Control *control);

@@ -56,10 +56,10 @@
 
 /* External variables --------------------------------------------------------*/
 extern I2C_HandleTypeDef hi2c1;
+extern SPI_HandleTypeDef hspi1;
 extern SPI_HandleTypeDef hspi3;
 extern TIM_HandleTypeDef htim3;
 extern UART_HandleTypeDef huart1;
-extern UART_HandleTypeDef huart2;
 extern TIM_HandleTypeDef htim1;
 
 /* USER CODE BEGIN EV */
@@ -221,29 +221,26 @@ void I2C1_ER_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles SPI1 global interrupt.
+  */
+void SPI1_IRQHandler(void)
+{
+  /* USER CODE BEGIN SPI1_IRQn 0 */
+
+  /* USER CODE END SPI1_IRQn 0 */
+  HAL_SPI_IRQHandler(&hspi1);
+  /* USER CODE BEGIN SPI1_IRQn 1 */
+
+  /* USER CODE END SPI1_IRQn 1 */
+}
+
+/**
   * @brief This function handles SPI2 global interrupt.
   */
 void SPI2_IRQHandler(void)
 {
   /* USER CODE BEGIN SPI2_IRQn 0 */
-  /* Check RXNE flag value in ISR register */
-  if (LL_SPI_IsActiveFlag_RXNE(SPI2))
-  {
-    /* Call function Slave Reception Callback */
-    spi2_rx_cb(SPI2);
-  }
-  /* Check RXNE flag value in ISR register */
-  else if (LL_SPI_IsActiveFlag_TXE(SPI2))
-  {
-    /* Call function Slave Reception Callback */
-    spi2_tx_cb(SPI2);
-  }
-  /* Check STOP flag value in ISR register */
-  else if (LL_SPI_IsActiveFlag_OVR(SPI2))
-  {
-    /* Call Error function */
-    spi2_transfererror_cb(SPI2);
-  }
+
   /* USER CODE END SPI2_IRQn 0 */
   /* USER CODE BEGIN SPI2_IRQn 1 */
 
@@ -265,17 +262,17 @@ void USART1_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles USART2 global interrupt.
+  * @brief This function handles EXTI line[15:10] interrupts.
   */
-void USART2_IRQHandler(void)
+void EXTI15_10_IRQHandler(void)
 {
-  /* USER CODE BEGIN USART2_IRQn 0 */
+  /* USER CODE BEGIN EXTI15_10_IRQn 0 */
 
-  /* USER CODE END USART2_IRQn 0 */
-  HAL_UART_IRQHandler(&huart2);
-  /* USER CODE BEGIN USART2_IRQn 1 */
+  /* USER CODE END EXTI15_10_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(B1_Pin);
+  /* USER CODE BEGIN EXTI15_10_IRQn 1 */
 
-  /* USER CODE END USART2_IRQn 1 */
+  /* USER CODE END EXTI15_10_IRQn 1 */
 }
 
 /**

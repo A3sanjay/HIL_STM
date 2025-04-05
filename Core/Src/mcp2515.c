@@ -63,6 +63,7 @@ void mcp2515_init(MCP2515_Settings *settings, MCP2515_Storage *storage)
 void mcp2515_process_byte(SPI_Settings *settings)
 {
     uint8_t command_byte = settings->rx_data[0];
+
     // Handle read instructions
     switch (command_byte)
     {

@@ -29,6 +29,8 @@
 #define SETUP_MAX_UART_PACKET_LENGTH MAX_UART_PACKET_LENGTH
 #define RESPONSE_UART_PACKET_LENGTH MAX_UART_PACKET_LENGTH
 
+#define END_LINE_CHARACTER 0x0A
+
 typedef struct
 {
     UART_HandleTypeDef *huart;
@@ -43,5 +45,6 @@ void uart_control_rx_start(UART_Control *control);
 void uart_control_update_state(UART_Settings *settings);
 void uart_control_rx_cb(UART_Settings *settings);
 void uart_control_tx(UART_Settings *settings);
+void uart_control_tx_add_end_line(uint8_t *buffer, uint8_t buffer_length);
 
 #endif /* INC_UART_CONTROL_H_ */
