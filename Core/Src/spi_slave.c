@@ -16,17 +16,15 @@
 
 static volatile SPI_FSM spi_fsm_state[NUM_SPI_SLAVE_PORTS];
 static volatile SPI_Settings spi_settings[NUM_SPI_SLAVE_PORTS];
-static void (*spi_process_byte)(SPI_Settings *);
-static void (*spi_process_received_data)(SPI_Settings *);
+static SPI_Callbacks spi_callbacks[NUM_SPI_SLAVE_PORTS];
 
-extern TIM_HandleTypeDef htim3;
-
-void spi_slave_init(SPI_Settings *settings, SPI_SLAVE_SELECT slave_select, void (*spi_rx_process_cb)(SPI_Settings *), void (*spi_byte_process_cb)(SPI_Settings *))
+void spi_slave_init(SPI_Settings *settings, SPI_SLAVE_SELECT slave_select, SPI_Callbacks *cbs)
 {
 	uint8_t spi_index = settings->spi_port;
 	memcpy(&(spi_settings[spi_index]), settings, sizeof(SPI_Settings));
-	spi_process_received_data = spi_rx_process_cb;
-	spi_process_byte = spi_byte_process_cb;
+	memcpy(&(spi_callbacks[spi_index]), cbs, sizeof(SPI_Callbacks));
+
+	spi_settings[spi_index].cs_pin = settings->cs_pin;
 
 	spi_fsm_state[spi_index].spi_slave_state = SPI_IDLE;
 	spi_fsm_state[spi_index].spi_slave_select = slave_select;
@@ -38,9 +36,10 @@ void spi_slave_init(SPI_Settings *settings, SPI_SLAVE_SELECT slave_select, void 
 	LL_SPI_Enable(settings->spi_handle);
 }
 
-void spi2_rx_cb(SPI_TypeDef *spi_handle)
+// TODO: Change the spi_index values for > 2 SPI devices if necessary (2 is the current max)
+void spi_slave_rx_cb(SPI_TypeDef *spi_handle)
 {
-	uint8_t spi_index = SPI_PORT_2;
+	uint8_t spi_index = (spi_settings[0].spi_handle == spi_handle) ? SPI_PORT_1 : SPI_PORT_2;
 
 	if (spi_fsm_state[spi_index].spi_slave_state == SPI_TRANSACTION)
 	{
@@ -60,18 +59,19 @@ void spi2_rx_cb(SPI_TypeDef *spi_handle)
 	spi_settings[spi_index].rx_data[next_index] = LL_SPI_ReceiveData8(spi_settings[spi_index].spi_handle);
 	spi_settings[spi_index].rx_index += 1;
 
-	// Process the byte if it is the first byte (command byte) or an important byte
-	if (spi_settings[spi_index].rx_index == 1 || spi_settings[spi_index].rx_byte_callback)
-	{
-		spi_process_byte(&(spi_settings[spi_index]));
-	}
+	// Process byte that is received
+	// if (spi_settings[spi_index].rx_index == 1 || spi_settings[spi_index].rx_byte_callback)
+	// {
+	spi_callbacks[spi_index].spi_byte_process_cb(&(spi_settings[spi_index]));
+	// }
 
 	spi_fsm_state[spi_index].spi_slave_state = SPI_TRANSACTION;
 }
 
-void spi2_tx_cb(SPI_TypeDef *spi_handle)
+void spi_slave_tx_cb(SPI_TypeDef *spi_handle)
 {
-	uint8_t spi_index = SPI_PORT_2;
+	// TODO: Check what's wrong with multi-byte response
+	uint8_t spi_index = (spi_settings[0].spi_handle == spi_handle) ? SPI_PORT_1 : SPI_PORT_2;
 
 	if (spi_settings[spi_index].tx_index < spi_settings[spi_index].bytes_to_send)
 	{
@@ -90,37 +90,34 @@ void spi2_tx_cb(SPI_TypeDef *spi_handle)
 	// spi_fsm_state[spi_index].spi_slave_state = SPI_SLAVE_TX;
 }
 
-void spi2_transfererror_cb(SPI_TypeDef *spi_handle)
+void spi_slave_transfer_error_cb(SPI_TypeDef *spi_handle)
 {
 	// TODO: Handle errors in SPI transmission
-	uint8_t spi_index = SPI_PORT_2;
+	uint8_t spi_index = (spi_settings[0].spi_handle == spi_handle) ? SPI_PORT_1 : SPI_PORT_2;
 	// spi_fsm_state[spi_index].spi_slave_state = SPI_ERROR;
 }
 
 // Timer to re-enable listening for SPI messages and handle the incrementing of timer
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+void spi_timer_cb(TIM_HandleTypeDef *timer_handle)
 {
-	// TODO: Fix the timer handle check
+	uint8_t spi_index = (spi_settings[0].timer_handle == timer_handle) ? SPI_PORT_1 : SPI_PORT_2;
+
 	// Check for end of SPI Rx Transaction
-	if (htim == &htim3)
+	if (spi_index < NUM_SPI_SLAVE_PORTS)
 	{
-		uint8_t spi_index = SPI_PORT_2;
 		if (spi_fsm_state[spi_index].spi_slave_state == SPI_TRANSACTION)
 		{
-			if (LL_GPIO_IsInputPinSet(GPIOB, LL_GPIO_PIN_12))
+			if (LL_GPIO_IsInputPinSet(spi_settings[spi_index].cs_pin->gpio_port, spi_settings[spi_index].cs_pin->gpio_pin))
 			{
-				spi_process_received_data(&(spi_settings[spi_index]));
+				// Transaction has completed, so process data packet and reset everything
+				spi_callbacks[spi_index].spi_rx_process_cb(&(spi_settings[spi_index]));
 
-				HAL_TIM_Base_Stop_IT(&htim3);
+				HAL_TIM_Base_Stop_IT(spi_settings[spi_index].timer_handle);
 				spi_settings[spi_index].rx_index = 0;
 				spi_settings[spi_index].tx_index = 0;
 				spi_settings[spi_index].bytes_to_send = 0;
 				spi_fsm_state[spi_index].spi_slave_state = SPI_IDLE;
 			}
 		}
-	}
-	else if (htim->Instance == TIM1)
-	{
-		HAL_IncTick();
 	}
 }

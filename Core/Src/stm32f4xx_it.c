@@ -56,9 +56,8 @@
 
 /* External variables --------------------------------------------------------*/
 extern I2C_HandleTypeDef hi2c1;
-extern SPI_HandleTypeDef hspi1;
-extern SPI_HandleTypeDef hspi3;
 extern TIM_HandleTypeDef htim3;
+extern TIM_HandleTypeDef htim4;
 extern UART_HandleTypeDef huart1;
 extern TIM_HandleTypeDef htim1;
 
@@ -70,8 +69,8 @@ extern TIM_HandleTypeDef htim1;
 /*           Cortex-M4 Processor Interruption and Exception Handlers          */
 /******************************************************************************/
 /**
-  * @brief This function handles Non maskable interrupt.
-  */
+ * @brief This function handles Non maskable interrupt.
+ */
 void NMI_Handler(void)
 {
   /* USER CODE BEGIN NonMaskableInt_IRQn 0 */
@@ -85,8 +84,8 @@ void NMI_Handler(void)
 }
 
 /**
-  * @brief This function handles Hard fault interrupt.
-  */
+ * @brief This function handles Hard fault interrupt.
+ */
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
@@ -100,8 +99,8 @@ void HardFault_Handler(void)
 }
 
 /**
-  * @brief This function handles Memory management fault.
-  */
+ * @brief This function handles Memory management fault.
+ */
 void MemManage_Handler(void)
 {
   /* USER CODE BEGIN MemoryManagement_IRQn 0 */
@@ -115,8 +114,8 @@ void MemManage_Handler(void)
 }
 
 /**
-  * @brief This function handles Pre-fetch fault, memory access fault.
-  */
+ * @brief This function handles Pre-fetch fault, memory access fault.
+ */
 void BusFault_Handler(void)
 {
   /* USER CODE BEGIN BusFault_IRQn 0 */
@@ -130,8 +129,8 @@ void BusFault_Handler(void)
 }
 
 /**
-  * @brief This function handles Undefined instruction or illegal state.
-  */
+ * @brief This function handles Undefined instruction or illegal state.
+ */
 void UsageFault_Handler(void)
 {
   /* USER CODE BEGIN UsageFault_IRQn 0 */
@@ -145,8 +144,8 @@ void UsageFault_Handler(void)
 }
 
 /**
-  * @brief This function handles Debug monitor.
-  */
+ * @brief This function handles Debug monitor.
+ */
 void DebugMon_Handler(void)
 {
   /* USER CODE BEGIN DebugMonitor_IRQn 0 */
@@ -165,8 +164,8 @@ void DebugMon_Handler(void)
 /******************************************************************************/
 
 /**
-  * @brief This function handles TIM1 update interrupt and TIM10 global interrupt.
-  */
+ * @brief This function handles TIM1 update interrupt and TIM10 global interrupt.
+ */
 void TIM1_UP_TIM10_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM1_UP_TIM10_IRQn 0 */
@@ -179,8 +178,8 @@ void TIM1_UP_TIM10_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles TIM3 global interrupt.
-  */
+ * @brief This function handles TIM3 global interrupt.
+ */
 void TIM3_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM3_IRQn 0 */
@@ -193,8 +192,22 @@ void TIM3_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles I2C1 event interrupt.
-  */
+ * @brief This function handles TIM4 global interrupt.
+ */
+void TIM4_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM4_IRQn 0 */
+
+  /* USER CODE END TIM4_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim4);
+  /* USER CODE BEGIN TIM4_IRQn 1 */
+
+  /* USER CODE END TIM4_IRQn 1 */
+}
+
+/**
+ * @brief This function handles I2C1 event interrupt.
+ */
 void I2C1_EV_IRQHandler(void)
 {
   /* USER CODE BEGIN I2C1_EV_IRQn 0 */
@@ -207,8 +220,8 @@ void I2C1_EV_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles I2C1 error interrupt.
-  */
+ * @brief This function handles I2C1 error interrupt.
+ */
 void I2C1_ER_IRQHandler(void)
 {
   /* USER CODE BEGIN I2C1_ER_IRQn 0 */
@@ -221,26 +234,48 @@ void I2C1_ER_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles SPI1 global interrupt.
-  */
+ * @brief This function handles SPI1 global interrupt.
+ */
 void SPI1_IRQHandler(void)
 {
   /* USER CODE BEGIN SPI1_IRQn 0 */
-
+  if (LL_SPI_IsActiveFlag_RXNE(SPI1))
+  {
+    spi_slave_rx_cb(SPI1);
+  }
+  else if (LL_SPI_IsActiveFlag_TXE(SPI1))
+  {
+    spi_slave_tx_cb(SPI1);
+  }
+  else if (LL_SPI_IsActiveFlag_OVR(SPI1))
+  {
+    spi_slave_transfer_error_cb(SPI1);
+  }
   /* USER CODE END SPI1_IRQn 0 */
-  HAL_SPI_IRQHandler(&hspi1);
   /* USER CODE BEGIN SPI1_IRQn 1 */
 
   /* USER CODE END SPI1_IRQn 1 */
 }
 
 /**
-  * @brief This function handles SPI2 global interrupt.
-  */
+ * @brief This function handles SPI2 global interrupt.
+ */
 void SPI2_IRQHandler(void)
 {
   /* USER CODE BEGIN SPI2_IRQn 0 */
-
+  // Check flags and call callbacks
+  if (LL_SPI_IsActiveFlag_RXNE(SPI2))
+  {
+    spi_slave_rx_cb(SPI2);
+  }
+  else if (LL_SPI_IsActiveFlag_TXE(SPI2))
+  {
+    spi_slave_tx_cb(SPI2);
+  }
+  else if (LL_SPI_IsActiveFlag_OVR(SPI2))
+  {
+    spi_slave_transfer_error_cb(SPI2);
+  }
   /* USER CODE END SPI2_IRQn 0 */
   /* USER CODE BEGIN SPI2_IRQn 1 */
 
@@ -248,8 +283,8 @@ void SPI2_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles USART1 global interrupt.
-  */
+ * @brief This function handles USART1 global interrupt.
+ */
 void USART1_IRQHandler(void)
 {
   /* USER CODE BEGIN USART1_IRQn 0 */
@@ -262,8 +297,8 @@ void USART1_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles EXTI line[15:10] interrupts.
-  */
+ * @brief This function handles EXTI line[15:10] interrupts.
+ */
 void EXTI15_10_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI15_10_IRQn 0 */
@@ -276,14 +311,13 @@ void EXTI15_10_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles SPI3 global interrupt.
-  */
+ * @brief This function handles SPI3 global interrupt.
+ */
 void SPI3_IRQHandler(void)
 {
   /* USER CODE BEGIN SPI3_IRQn 0 */
 
   /* USER CODE END SPI3_IRQn 0 */
-  HAL_SPI_IRQHandler(&hspi3);
   /* USER CODE BEGIN SPI3_IRQn 1 */
 
   /* USER CODE END SPI3_IRQn 1 */

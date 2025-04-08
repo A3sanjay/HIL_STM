@@ -21,6 +21,8 @@
 
 #define MCP2515_SPI_PORT SPI_PORT_2
 
+#define MCP2515_COMMAND_BYTE_END_INDEX 1
+
 typedef struct
 {
     SPI_Settings *spi_settings;

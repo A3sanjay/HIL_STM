@@ -22,6 +22,7 @@ typedef struct
     SPI_SLAVE_SELECT spi_slave_select;
 } SPI_FSM;
 
-void spi_slave_init(SPI_Settings *settings, SPI_SLAVE_SELECT slave_select, void (*spi_rx_process_cb)(SPI_Settings *), void (*spi_byte_process_cb)(SPI_Settings *));
+
+void spi_slave_init(SPI_Settings *settings, SPI_SLAVE_SELECT slave_select, SPI_Callbacks *cbs);
 
 #endif /* INC_SPI_SLAVE_H_ */

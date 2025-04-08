@@ -26,10 +26,10 @@ void spi_master_init(SPI_Settings *settings)
     LL_SPI_Enable(settings->spi_handle);
 }
 
-void spi_master_transmit_buffer(SPI_Settings *settings, GPIO_Pin *cs_pin)
+void spi_master_transmit_buffer(SPI_Settings *settings)
 {
     // Drive the CS pin low, transmit the message, then drive it high again
-    HAL_GPIO_WritePin(cs_pin->gpio_port, cs_pin->gpio_pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(settings->cs_pin->gpio_port, settings->cs_pin->gpio_pin, GPIO_PIN_RESET);
 
     for (int8_t i = settings->bytes_to_send - 1; i >= 0; i--)
     {
@@ -44,5 +44,5 @@ void spi_master_transmit_buffer(SPI_Settings *settings, GPIO_Pin *cs_pin)
     {
     }
 
-    HAL_GPIO_WritePin(cs_pin->gpio_port, cs_pin->gpio_pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(settings->cs_pin->gpio_port, settings->cs_pin->gpio_pin, GPIO_PIN_SET);
 }

@@ -20,7 +20,8 @@ typedef enum
 typedef enum
 {
     SPI_NO_SLAVE,
-    MCP2515
+    MCP2515,
+    LTC6811
 } SPI_SLAVE_SELECT;
 
 #endif /* INC_SPI_SLAVE_FSM_DEFS_H_ */

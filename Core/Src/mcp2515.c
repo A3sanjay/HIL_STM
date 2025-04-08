@@ -56,12 +56,18 @@ void mcp2515_init(MCP2515_Settings *settings, MCP2515_Storage *storage)
     settings->spi_settings->mcp2515_reg_map = storage->mcp2515_reg_map;
     settings->spi_settings->mcp2515_num_registers = MCP2515_NUM_REGISTERS;
 
-    // TODO: Create a callbacks struct for the device callbacks instead of passing in one by one
-    spi_slave_init(settings->spi_settings, MCP2515, mcp2515_process_received_data, mcp2515_process_byte);
+    SPI_Callbacks spi_callbacks = {.spi_byte_process_cb = mcp2515_process_byte, .spi_rx_process_cb = mcp2515_process_received_data};
+
+    spi_slave_init(settings->spi_settings, MCP2515, &spi_callbacks);
 }
 
 void mcp2515_process_byte(SPI_Settings *settings)
 {
+    // Exit early if this byte does not need to be processed
+    if (settings->rx_index != MCP2515_COMMAND_BYTE_END_INDEX && !settings->rx_byte_callback) {
+        return;
+    }
+
     uint8_t command_byte = settings->rx_data[0];
 
     // Handle read instructions
@@ -78,7 +84,6 @@ void mcp2515_process_byte(SPI_Settings *settings)
             // Argument has been received
             uint8_t argument = settings->rx_data[1];
             // TODO: Fill tx buffer with max register values starting from argument, and keep sending until CS pin goes HIGH
-            // TODO: Check what's wrong with multi-byte response
             // for (uint8_t i = 0; i < settings->tx_buffer_size; i++)
             // {
             //     settings->tx_data[i] = settings->mcp2515_reg_map[argument + i].register_value;

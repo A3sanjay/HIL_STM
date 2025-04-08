@@ -87,12 +87,12 @@ void Error_Handler(void);
 #define SWO_Pin GPIO_PIN_3
 #define SWO_GPIO_Port GPIOB
 
-/* USER CODE BEGIN Private defines */
-  void spi2_rx_cb(SPI_TypeDef *spi_handle);
-  void spi2_tx_cb(SPI_TypeDef *spi_handle);
-  void spi2_transfererror_cb(SPI_TypeDef *spi_handle);
-
-/* USER CODE END Private defines */
+  /* USER CODE BEGIN Private defines */
+  void spi_slave_rx_cb(SPI_TypeDef *spi_handle);
+  void spi_slave_tx_cb(SPI_TypeDef *spi_handle);
+  void spi_slave_transfer_error_cb(SPI_TypeDef *spi_handle);
+  void spi_timer_cb(TIM_HandleTypeDef *timer_handle);
+  /* USER CODE END Private defines */
 
 #ifdef __cplusplus
 }

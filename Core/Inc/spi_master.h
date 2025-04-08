@@ -15,9 +15,9 @@
 #include "spi_defs.h"
 #include "gpio_defs.h"
 
-#define NUM_SPI_MASTER_PORTS 2
+#define NUM_SPI_MASTER_PORTS 1
 
 void spi_master_init(SPI_Settings *settings);
-void spi_master_transmit_buffer(SPI_Settings *settings, GPIO_Pin *cs_pin);
+void spi_master_transmit_buffer(SPI_Settings *settings);
 
 #endif /* INC_SPI_MASTER_H_ */

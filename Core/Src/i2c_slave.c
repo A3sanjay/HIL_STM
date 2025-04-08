@@ -13,10 +13,10 @@
 #include <string.h>
 #include <stdbool.h>
 
-static volatile I2C_FSM i2c_fsm_state[NUM_I2C_SLAVES];
-static volatile I2C_Settings i2c_settings[NUM_I2C_SLAVES];
+static volatile I2C_FSM i2c_fsm_state[NUM_I2C_SLAVE_DEVICES];
+static volatile I2C_Settings i2c_settings[NUM_I2C_SLAVE_DEVICES];
 static uint8_t i2c_address_mapping[NUM_I2C_ADDRESSES] = {0};
-static I2C_Callbacks i2c_callbacks[NUM_I2C_SLAVES];
+static I2C_Callbacks i2c_callbacks[NUM_I2C_SLAVE_DEVICES];
 
 // Develop an I2C receive state machine to keep track of how many bytes to receive, send, etc based on the peripheral that we are trying to simulate
 

@@ -22,7 +22,8 @@ static void prv_mcp4811_set_enable(uint16_t *tx_buffer)
     *tx_buffer |= val_to_set;
 }
 
-static void prv_mcp4811_set_disable(uint16_t *tx_buffer) {
+static void prv_mcp4811_set_disable(uint16_t *tx_buffer)
+{
     // Set disable bit
     uint16_t val_to_set = EN_MSG_FALSE << EN_MSG_BIT_POS;
     *tx_buffer |= val_to_set;
@@ -56,8 +57,8 @@ static void prv_mcp4811_convert_voltage_to_output(float desired_voltage, float *
 {
     if (desired_voltage < 0 || desired_voltage > MAX_OUTPUT_VOLTAGE)
     {
-    	// Set the enable bit to 0, the desired voltage is invalid, so maintain the DAC's current output voltage
-    	prv_mcp4811_set_disable(tx_buffer);
+        // Set the enable bit to 0, the desired voltage is invalid, so maintain the DAC's current output voltage
+        prv_mcp4811_set_disable(tx_buffer);
         return;
     }
 
@@ -68,7 +69,7 @@ static void prv_mcp4811_send_message(MCP4811_Settings *settings, uint16_t *tx_da
 {
     memcpy(settings->spi_settings->tx_data, tx_data, data_length);
     settings->spi_settings->bytes_to_send = data_length;
-    spi_master_transmit_buffer(settings->spi_settings, settings->cs_pin);
+    spi_master_transmit_buffer(settings->spi_settings);
 }
 
 void mcp4811_init(MCP4811_Settings *settings, MCP4811_Storage *storage)

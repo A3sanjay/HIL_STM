@@ -105,9 +105,9 @@ void board_control_start_simulation(BOARDS_TO_SIMULATE board)
         pca9555_init(&pca9555_settings[1], &pca9555_storage[1]);
 
         // Init one DAC on SPI3 and set voltage output to PD default
-        SPI_Settings mcp4811_spi_settings = {.spi_handle = SPI3, .spi_port = SPI_PORT_3};
         GPIO_Pin mcp4811_cs_pin = {.gpio_port = SPI3_CS_GPIO_Port, .gpio_pin = SPI3_CS_Pin};
-        MCP4811_Settings mcp4811_settings = {.spi_settings = &mcp4811_spi_settings, .cs_pin = &mcp4811_cs_pin};
+        SPI_Settings mcp4811_spi_settings = {.spi_handle = SPI3, .spi_port = SPI_PORT_3, .cs_pin = &mcp4811_cs_pin};
+        MCP4811_Settings mcp4811_settings = {.spi_settings = &mcp4811_spi_settings};
         MCP4811_Storage mcp4811_storage;
         mcp4811_init(&mcp4811_settings, &mcp4811_storage);
         float voltage_to_set = POWER_DISTRIBUTION_ANALOG_SIGNAL_DEFAULT_VOLTAGE;
