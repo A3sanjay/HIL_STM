@@ -67,15 +67,15 @@ static void prv_mcp4811_convert_voltage_to_output(float desired_voltage, float *
 
 static void prv_mcp4811_send_message(MCP4811_Settings *settings, uint16_t *tx_data, uint8_t data_length)
 {
-    memcpy(settings->spi_settings->tx_data, tx_data, data_length);
-    settings->spi_settings->bytes_to_send = data_length;
-    spi_master_transmit_buffer(settings->spi_settings);
+    memcpy(settings->spi_storage->tx_data, tx_data, data_length);
+    settings->spi_storage->bytes_to_send = data_length;
+    spi_master_transmit_buffer(settings->spi_settings, settings->spi_storage);
 }
 
 void mcp4811_init(MCP4811_Settings *settings, MCP4811_Storage *storage)
 {
-    settings->spi_settings->tx_data = storage->tx_data;
-    settings->spi_settings->tx_buffer_size = MCP4811_SPI_TX_BUFFER_SIZE;
+    settings->spi_storage->tx_data = storage->tx_data;
+    settings->spi_storage->tx_buffer_size = MCP4811_SPI_TX_BUFFER_SIZE;
 
     spi_master_init(settings->spi_settings);
 }

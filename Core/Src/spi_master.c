@@ -11,7 +11,7 @@
 
 #include "main.h"
 #include "spi_master.h"
-#include "spi_defs.h"
+
 #include "gpio_defs.h"
 
 static volatile SPI_Settings spi_master_settings[NUM_SPI_MASTER_PORTS];
@@ -26,18 +26,18 @@ void spi_master_init(SPI_Settings *settings)
     LL_SPI_Enable(settings->spi_handle);
 }
 
-void spi_master_transmit_buffer(SPI_Settings *settings)
+void spi_master_transmit_buffer(SPI_Settings *settings, SPI_Storage *storage)
 {
     // Drive the CS pin low, transmit the message, then drive it high again
     HAL_GPIO_WritePin(settings->cs_pin->gpio_port, settings->cs_pin->gpio_pin, GPIO_PIN_RESET);
 
-    for (int8_t i = settings->bytes_to_send - 1; i >= 0; i--)
+    for (int8_t i = storage->bytes_to_send - 1; i >= 0; i--)
     {
         while (!LL_SPI_IsActiveFlag_TXE(settings->spi_handle))
         {
         }
 
-        LL_SPI_TransmitData8(settings->spi_handle, settings->tx_data[i]);
+        LL_SPI_TransmitData8(settings->spi_handle, storage->tx_data[i]);
     }
 
     while (LL_SPI_IsActiveFlag_BSY(settings->spi_handle))

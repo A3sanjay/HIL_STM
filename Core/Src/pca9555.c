@@ -54,7 +54,7 @@ void pca9555_init_reg_map()
     }
 }
 
-// TODO: Revisit the structure of what goes in I2C layer and what goes in device driver layer
+// TODO: Revisit the structure of what goes in I2C layer and what goes in device driver layer - copy SPI
 void pca9555_init(PCA9555_Settings *settings, PCA9555_Storage *storage)
 {
     memcpy(storage->pca9555_reg_map, &initial_pca9555_reg_map, sizeof(initial_pca9555_reg_map));

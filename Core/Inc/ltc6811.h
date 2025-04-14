@@ -11,7 +11,6 @@
 #include <stdint.h>
 
 #include "ltc6811_defs.h"
-#include "spi_defs.h"
 #include "spi_slave.h"
 
 #define MAX_NUM_LTC6811 1
@@ -23,6 +22,8 @@
 #define LTC6811_NUM_DEVICES 3
 
 #define LTC6811_SPI_PORT SPI_PORT_1
+
+#define LTC6811_CMD_BYTE_LENGTH 2
 
 #define LTC6811_PEC_LENGTH 2
 
@@ -41,10 +42,14 @@
 // Important byte indexes to start processing data
 #define LTC6811_COMMAND_BYTE_END_INDEX 2
 #define LTC6811_PEC_END_INDEX 4
+#define LTC6811_READ_PRELOAD_INDEX_DEVICE_1 LTC6811_PEC_END_INDEX - 1
+#define LTC6811_READ_PRELOAD_INDEX_DEVICE_2 (LTC6811_PEC_END_INDEX - 1) + 8
+#define LTC6811_READ_PRELOAD_INDEX_DEVICE_3 (LTC6811_PEC_END_INDEX - 1) + 16
 
 typedef struct
 {
     SPI_Settings *spi_settings;
+    SPI_Storage *spi_storage;
 } LTC6811_Settings;
 
 typedef struct
@@ -55,7 +60,7 @@ typedef struct
 } LTC6811_Storage;
 
 void ltc6811_init(LTC6811_Settings *settings, LTC6811_Storage *storage);
-void ltc6811_process_byte(SPI_Settings *settings);
-void ltc6811_process_received_data(SPI_Settings *settings);
+void ltc6811_process_byte(SPI_Settings *settings, SPI_Storage *storage);
+void ltc6811_process_received_data(SPI_Settings *settings, SPI_Storage *storage);
 
 #endif /* INC_LTC6811_H_ */

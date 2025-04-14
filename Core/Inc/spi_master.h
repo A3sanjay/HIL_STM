@@ -12,12 +12,12 @@
 #include <stdbool.h>
 
 #include "main.h"
-#include "spi_defs.h"
+#include "spi_slave.h"
 #include "gpio_defs.h"
 
 #define NUM_SPI_MASTER_PORTS 1
 
 void spi_master_init(SPI_Settings *settings);
-void spi_master_transmit_buffer(SPI_Settings *settings);
+void spi_master_transmit_buffer(SPI_Settings *settings, SPI_Storage *storage);
 
 #endif /* INC_SPI_MASTER_H_ */

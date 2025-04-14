@@ -11,7 +11,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "spi_defs.h"
 #include "spi_master.h"
 #include "spi_slave.h"
 #include "gpio_defs.h"
@@ -48,7 +47,7 @@
 typedef struct
 {
     SPI_Settings *spi_settings;
-    GPIO_Pin *cs_pin;
+    SPI_Storage *spi_storage;
 } MCP4811_Settings;
 
 typedef struct

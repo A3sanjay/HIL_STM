@@ -14,7 +14,7 @@
 #include "i2c_slave.h"
 #include "max17261_defs.h"
 
-#define MAX_NUM_MAX17261 2
+#define MAX_NUM_MAX17261 1
 
 #define MAX17261_I2C_ADDRESS 0x36
 #define MAX17261_NUM_REGISTERS 255

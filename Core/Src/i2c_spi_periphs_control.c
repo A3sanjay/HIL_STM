@@ -16,6 +16,7 @@
 #include "pca9555.h"
 #include "max17261.h"
 #include "mcp2515.h"
+#include "ltc6811.h"
 #include "mcp4811.h"
 #include "uart_control.h"
 #include "proto_processing.h"
@@ -28,14 +29,17 @@ extern TIM_HandleTypeDef htim3;
 extern UART_HandleTypeDef huart1;
 
 // Static variables for peripherals, protocols, etc
-static PCA9555_Settings pca9555_settings[MAX_I2C_SLAVES_TO_SIMULATE];
-static PCA9555_Storage pca9555_storage[MAX_I2C_SLAVES_TO_SIMULATE];
+static PCA9555_Settings pca9555_settings[MAX_NUM_PCA9555];
+static PCA9555_Storage pca9555_storage[MAX_NUM_PCA9555];
 
-static MAX17261_Settings max17261_settings[MAX_I2C_SLAVES_TO_SIMULATE];
-static MAX17261_Storage max17261_storage[MAX_I2C_SLAVES_TO_SIMULATE];
+static MAX17261_Settings max17261_settings[MAX_NUM_MAX17261];
+static MAX17261_Storage max17261_storage[MAX_NUM_MAX17261];
 
-static MCP2515_Settings mcp2515_settings[MAX_I2C_SLAVES_TO_SIMULATE];
-static MCP2515_Storage mcp2515_storage[MAX_I2C_SLAVES_TO_SIMULATE];
+static MCP2515_Settings mcp2515_settings[MAX_NUM_MCP2515];
+static MCP2515_Storage mcp2515_storage[MAX_NUM_MCP2515];
+
+static LTC6811_Settings ltc6811_settings[MAX_NUM_LTC6811];
+static LTC6811_Storage ltc6811_storage[MAX_NUM_LTC6811];
 
 static I2C_Settings i2c_settings[MAX_I2C_SLAVES_TO_SIMULATE];
 static SPI_Settings spi_settings[MAX_SPI_SLAVES_TO_SIMULATE];
@@ -87,7 +91,7 @@ void board_control_start_simulation(BOARDS_TO_SIMULATE board)
 {
     if (board == POWER_DISTRIBUTION)
     {
-        // Power Distribution has 2 x GPIO Expanders
+        // Power Distribution has 2 x GPIO Expanders + 1 x Analog Signal
         pca9555_init_reg_map();
 
         // Initialize the first GPIO Expander
@@ -115,7 +119,7 @@ void board_control_start_simulation(BOARDS_TO_SIMULATE board)
     }
     else if (board == CENTRE_CONSOLE)
     {
-        // Centre Console has 2 x GPIO Expanders
+        // Centre Console has 2 x GPIO Expanders + 2 x Analog Signal
         pca9555_init_reg_map();
 
         // Initialize the first GPIO Expander
@@ -134,8 +138,7 @@ void board_control_start_simulation(BOARDS_TO_SIMULATE board)
     }
     else if (board == MCI)
     {
-        // MCI has 1 x SPI -> CAN converter
-        mcp2515_init_reg_map();
+        // MCI has 1 x SPI -> CAN converter + 1 x Analog Signal
 
         // Initialize SPI -> CAN converter
         spi_settings[0].spi_handle = spi_handle2;
@@ -146,7 +149,7 @@ void board_control_start_simulation(BOARDS_TO_SIMULATE board)
     }
     else if (board == BMS)
     {
-        // BMS has 1 x Current Sense + 1 x AFE
+        // BMS has 1 x Current Sense + 1 x AFE + 2 x Analog Signal
         max17261_init_reg_map();
 
         // Initialize the Current Sense
