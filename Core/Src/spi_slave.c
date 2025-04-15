@@ -8,9 +8,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include <stdio.h>
-#include "main.h"
 
+#include "main.h"
 #include "spi_slave.h"
 #include "spi_slave_fsm_defs.h"
 
@@ -97,6 +96,7 @@ void spi_slave_transfer_error_cb(SPI_TypeDef *spi_handle)
 }
 
 // Timer to detect end of SPI transaction (CS pin goes high) and process data
+// TODO: If there are timing issues, this timer could be firing too frequently. It is enabled at the start of a SPI transaction, and fires once every ~50us to check for end of transaction before terminating at end of transaction.
 void spi_timer_cb(TIM_HandleTypeDef *timer_handle)
 {
 	uint8_t spi_index = (spi_settings[0].timer_handle == timer_handle) ? SPI_PORT_1 : SPI_PORT_2;

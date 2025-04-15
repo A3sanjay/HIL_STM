@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
-#include <stdio.h>
+
 #include "main.h"
 #include "spi_slave.h"
 #include "ltc6811.h"
@@ -27,12 +27,6 @@ static void set_tx_info(SPI_Settings *settings, SPI_Storage *storage, uint8_t *d
     settings->rx_byte_callback = false;
 }
 
-static void preload_tx_info(SPI_Settings *settings, SPI_Storage *storage, uint8_t *data, uint8_t data_length, uint8_t data_offset)
-{
-    // Use offset to determine which device to copy data to
-    memcpy(storage->tx_data + (data_offset * data_length), data, data_length);
-}
-
 static bool command_byte_mask(uint16_t command_byte, uint16_t command_mask)
 {
     if (((command_byte & command_mask) != 0) || (command_mask == 0))
@@ -43,14 +37,13 @@ static bool command_byte_mask(uint16_t command_byte, uint16_t command_mask)
 
 static uint8_t prv_process_command_byte(uint16_t command_byte)
 {
-    // Voltage conversion command
-	// TODO: Differentiate between voltage conversion and temp conversion, as temp conversion is mistaken as voltage conversion
-    if (command_byte_mask(command_byte, LTC6811_ADCV_RESERVED) && command_byte_mask(command_byte, LTC6811_CNVT_CELL_ALL))
-        return VOLTAGE_CONVERSION;
-
     // Temp conversion command
     if (command_byte_mask(command_byte, LTC6811_ADAX_RESERVED) && command_byte_mask(command_byte, LTC6811_ADAX_GPIO4))
         return TEMP_CONVERSION;
+
+    // Voltage conversion command
+    if (command_byte_mask(command_byte, LTC6811_ADCV_RESERVED) && command_byte_mask(command_byte, LTC6811_CNVT_CELL_ALL))
+        return VOLTAGE_CONVERSION;
 
     // Voltage read command(s)
     if (command_byte_mask(command_byte, LTC6811_RDCVA_RESERVED))
@@ -95,29 +88,18 @@ void ltc6811_init(LTC6811_Settings *settings, LTC6811_Storage *storage)
 
 void ltc6811_process_byte(SPI_Settings *settings, SPI_Storage *storage)
 {
-    // Exit early if this byte does not need to be processed
-//     if (storage->rx_index != LTC6811_COMMAND_BYTE_END_INDEX && storage->rx_index != LTC6811_PEC_END_INDEX && storage->rx_index != 3 && !settings->rx_byte_callback)
-//     {
-//         return;
-//     }
+    // TODO: Can add early exit conditions to improve timing/performance of response (not all bytes have to be processed)
 
     uint8_t command_byte[LTC6811_CMD_BYTE_LENGTH] = {storage->rx_data[1], storage->rx_data[0]};
 
     // Will probably have to "process" command byte first
     LTC6811_COMMAND_REQUEST_TYPE command_type = prv_process_command_byte((command_byte[1] << 8) | command_byte[0]);
 
+    // TODO: Check PEC of transmission after 4 bytes have been sent (for read commands). Since response will already be starting at this point even if PEC is invalid, set bytes_to_send to 0 for rest of transaction.
     if (storage->rx_index == LTC6811_PEC_END_INDEX)
     {
         // Validate PEC after received and exit if invalid
-        if (storage->rx_data[3] == 0xC2)
-        {
-            printf("H");
-        }
         uint16_t received_pec = (storage->rx_data[2] << 8) | storage->rx_data[3];
-        //        if (received_pec != crc15_calculate(command_byte, LTC6811_CMD_BYTE_LENGTH))
-        //        {
-        //            return;
-        //        }
     }
 
     // Handle read instructions based on command_type
