@@ -42,7 +42,10 @@ static LTC6811_Settings ltc6811_settings[MAX_NUM_LTC6811];
 static LTC6811_Storage ltc6811_storage[MAX_NUM_LTC6811];
 
 static I2C_Settings i2c_settings[MAX_I2C_SLAVES_TO_SIMULATE];
+static I2C_Storage i2c_storage[MAX_I2C_SLAVES_TO_SIMULATE];
+
 static SPI_Settings spi_settings[MAX_SPI_SLAVES_TO_SIMULATE];
+static SPI_Storage spi_storage[MAX_SPI_SLAVES_TO_SIMULATE];
 
 static UART_Control uart_control;
 
@@ -51,6 +54,7 @@ void board_control_init(Board_Control *control)
     xTaskCreate(board_control_init_comms, "Board Simulation Init Task", NORMAL_STACK_DEPTH, (void *)control, NORMAL_PRIORITY, control->board_control_task);
 }
 
+// TODO: Update initialization procedure according to driver updates
 void board_control_init_comms(void *params)
 {
     Board_Control *control = (Board_Control *)params;
@@ -92,8 +96,6 @@ void board_control_start_simulation(BOARDS_TO_SIMULATE board)
     if (board == POWER_DISTRIBUTION)
     {
         // Power Distribution has 2 x GPIO Expanders + 1 x Analog Signal
-        pca9555_init_reg_map();
-
         // Initialize the first GPIO Expander
         i2c_settings[0].hi2c = &hi2c1;
         i2c_settings[0].i2c_slave_address = PCA9555_I2C_ADDRESS;
@@ -120,8 +122,6 @@ void board_control_start_simulation(BOARDS_TO_SIMULATE board)
     else if (board == CENTRE_CONSOLE)
     {
         // Centre Console has 2 x GPIO Expanders + 2 x Analog Signal
-        pca9555_init_reg_map();
-
         // Initialize the first GPIO Expander
         i2c_settings[0].hi2c = &hi2c1;
         i2c_settings[0].i2c_slave_address = PCA9555_I2C_ADDRESS;
@@ -150,8 +150,6 @@ void board_control_start_simulation(BOARDS_TO_SIMULATE board)
     else if (board == BMS)
     {
         // BMS has 1 x Current Sense + 1 x AFE + 2 x Analog Signal
-        max17261_init_reg_map();
-
         // Initialize the Current Sense
         i2c_settings[0].hi2c = &hi2c1;
         i2c_settings[0].i2c_slave_address = MAX17261_I2C_ADDRESS;

@@ -18,7 +18,8 @@
 
 extern UART_HandleTypeDef huart1;
 
-static PCA9555_Register_Map initial_pca9555_reg_map[PCA9555_NUM_REGISTERS] = {0};
+static PCA9555_Settings pca9555_settings;
+static PCA9555_Storage pca9555_storage;
 
 // Send an I2C Write Update Event message for PCA9555 over UART and encode using Proto
 static void prv_pca9555_send_i2c_write_update_event(uint8_t register_to_update, uint8_t value_to_write)
@@ -35,49 +36,69 @@ static void prv_pca9555_send_i2c_write_update_event(uint8_t register_to_update, 
     uart_control_tx(&settings);
 }
 
-void pca9555_init_reg_map()
+static void pca9555_init_reg_map(PCA9555_Register_Map *reg_map, uint8_t num_registers)
 {
-    for (uint8_t i = 0; i < PCA9555_NUM_REGISTERS; i++)
+    for (uint8_t i = 0; i < num_registers; i++)
     {
         if (i == PCA9555_CONFIGURATION_0)
         {
-            initial_pca9555_reg_map[i].register_value = PCA9555_CONFIGURATION_0_REG_DEFAULT_VAL;
+            reg_map[i].register_value = PCA9555_CONFIGURATION_0_REG_DEFAULT_VAL;
         }
         else if (i == PCA9555_CONFIGURATION_1)
         {
-            initial_pca9555_reg_map[i].register_value = PCA9555_CONFIGURATION_1_REG_DEFAULT_VAL;
+            reg_map[i].register_value = PCA9555_CONFIGURATION_1_REG_DEFAULT_VAL;
         }
         else
         {
-            initial_pca9555_reg_map[i].register_value = PCA9555_REG_DEFAULT_VAL;
+            reg_map[i].register_value = PCA9555_REG_DEFAULT_VAL;
         }
     }
 }
 
-// TODO: Revisit the structure of what goes in I2C layer and what goes in device driver layer - copy SPI
 void pca9555_init(PCA9555_Settings *settings, PCA9555_Storage *storage)
 {
-    memcpy(storage->pca9555_reg_map, &initial_pca9555_reg_map, sizeof(initial_pca9555_reg_map));
+    pca9555_init_reg_map(storage->pca9555_reg_map, PCA9555_NUM_REGISTERS);
+    storage->pca9555_num_registers = PCA9555_NUM_REGISTERS;
 
-    settings->i2c_settings->rx_data = storage->rx_data;
-    settings->i2c_settings->rx_buffer_size = PCA9555_I2C_RX_BUFFER_SIZE;
-    settings->i2c_settings->tx_data = storage->tx_data;
-    settings->i2c_settings->tx_buffer_size = PCA9555_I2C_TX_BUFFER_SIZE;
-    settings->i2c_settings->pca9555_reg_map = storage->pca9555_reg_map;
-    settings->i2c_settings->pca9555_num_registers = PCA9555_NUM_REGISTERS;
+    settings->i2c_storage->rx_data = storage->rx_data;
+    settings->i2c_storage->rx_buffer_size = PCA9555_I2C_RX_BUFFER_SIZE;
+    settings->i2c_storage->tx_data = storage->tx_data;
+    settings->i2c_storage->tx_buffer_size = PCA9555_I2C_TX_BUFFER_SIZE;
 
     I2C_Callbacks i2c_callbacks = {.i2c_process_received_data = pca9555_process_received_data, .i2c_process_address = pca9555_process_address};
-    i2c_init(settings->i2c_settings, PCA9555, &i2c_callbacks);
+    i2c_init(settings->i2c_settings, settings->i2c_storage, PCA9555, &i2c_callbacks);
 }
 
-void pca9555_process_received_data(I2C_Settings *settings, I2C_FSM *i2c_fsm)
+void pca9555_process_address(I2C_Settings *settings, I2C_Storage *storage, I2C_FSM *i2c_fsm, I2C_Callback_Info *cb_info)
+{
+    uint8_t i2c_slave_address = cb_info->i2c_slave_address;
+    uint8_t transfer_direction = cb_info->transfer_direction;
+
+    if (transfer_direction == I2C_TX)
+    {
+        // Master is transmitting and slave needs to receive
+        HAL_I2C_Slave_Seq_Receive_IT(settings->hi2c, storage->rx_data, PCA9555_I2C_NUM_BYTES_TO_RECEIVE, I2C_FIRST_FRAME);
+
+        i2c_fsm->i2c_slave_select = PCA9555;
+        i2c_fsm->i2c_slave_state = PCA9555_SLAVE_RX;
+    }
+    else if (transfer_direction == I2C_RX)
+    {
+        // Master is requesting data and slave needs to send
+        HAL_I2C_Slave_Seq_Transmit_IT(settings->hi2c, storage->tx_data, PCA9555_I2C_NUM_BYTES_TO_SEND, I2C_FIRST_AND_LAST_FRAME);
+
+        i2c_fsm->i2c_slave_state = PCA9555_SLAVE_TX;
+    }
+}
+
+void pca9555_process_received_data(I2C_Settings *settings, I2C_Storage *storage, I2C_FSM *i2c_fsm)
 {
     // Only one byte was received, so it was a write before read operation
     if (settings->hi2c->XferCount == settings->hi2c->XferSize - 1)
     {
         // Use the received register to pre-load the response
-        uint8_t reg_to_read = settings->rx_data[0];
-        settings->tx_data[0] = settings->pca9555_reg_map[reg_to_read].register_value;
+        uint8_t reg_to_read = storage->rx_data[0];
+        storage->tx_data[0] = pca9555_storage.pca9555_reg_map[reg_to_read].register_value;
 
         i2c_fsm->i2c_slave_state = PCA9555_SLAVE_RX;
     }
@@ -87,9 +108,9 @@ void pca9555_process_received_data(I2C_Settings *settings, I2C_FSM *i2c_fsm)
         if (i2c_fsm->i2c_slave_state == PCA9555_SLAVE_RX)
         {
             // Write the value into the register map
-            uint8_t reg_to_write = settings->rx_data[0];
-            uint8_t data_to_write = settings->rx_data[1];
-            settings->pca9555_reg_map[reg_to_write].register_value = data_to_write;
+            uint8_t reg_to_write = storage->rx_data[0];
+            uint8_t data_to_write = storage->rx_data[1];
+            pca9555_storage.pca9555_reg_map[reg_to_write].register_value = data_to_write;
             // prv_pca9555_send_i2c_write_update_event(reg_to_write, data_to_write);
         }
 
@@ -97,29 +118,7 @@ void pca9555_process_received_data(I2C_Settings *settings, I2C_FSM *i2c_fsm)
         i2c_fsm->i2c_slave_state = I2C_IDLE;
     }
 
-    // memset(settings->rx_data, 0, settings->rx_buffer_size);
+    // memset(storage->rx_data, 0, storage->rx_buffer_size);
 
     HAL_I2C_EnableListen_IT(settings->hi2c);
-}
-
-void pca9555_process_address(I2C_Settings *settings, I2C_FSM *i2c_fsm, I2C_Callback_Info *cb_info)
-{
-    uint8_t i2c_slave_address = cb_info->i2c_slave_address;
-    uint8_t transfer_direction = cb_info->transfer_direction;
-
-    if (transfer_direction == I2C_TX)
-    {
-        // Master is transmitting and slave needs to receive
-        HAL_I2C_Slave_Seq_Receive_IT(settings->hi2c, settings->rx_data, PCA9555_I2C_NUM_BYTES_TO_RECEIVE, I2C_FIRST_FRAME);
-
-        i2c_fsm->i2c_slave_select = PCA9555;
-        i2c_fsm->i2c_slave_state = PCA9555_SLAVE_RX;
-    }
-    else if (transfer_direction == I2C_RX)
-    {
-        // Master is requesting data and slave needs to send
-        HAL_I2C_Slave_Seq_Transmit_IT(settings->hi2c, settings->tx_data, PCA9555_I2C_NUM_BYTES_TO_SEND, I2C_FIRST_AND_LAST_FRAME);
-
-        i2c_fsm->i2c_slave_state = PCA9555_SLAVE_TX;
-    }
 }

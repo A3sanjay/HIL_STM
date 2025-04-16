@@ -17,39 +17,36 @@
 static MCP2515_Settings mcp2515_settings;
 static MCP2515_Storage mcp2515_storage;
 
-static void mcp2515_init_reg_map(MCP2515_Storage *storage)
+static void mcp2515_init_reg_map(MCP2515_Register_Map *reg_map, uint8_t num_registers)
 {
-    // Initialize reg_map during init to default values
-    memset(storage->mcp2515_reg_map, 0, sizeof(storage->mcp2515_reg_map));
-
-    for (uint8_t i = 0; i < storage->mcp2515_num_registers; i++)
+    for (uint8_t i = 0; i < num_registers; i++)
     {
         if (i == MCP2515_CTRL_REG_CANSTAT)
         {
-            storage->mcp2515_reg_map[i].register_value = MCP2515_CTRL_REG_CANSTAT_VAL;
+            reg_map[i].register_value = MCP2515_CTRL_REG_CANSTAT_VAL;
         }
         else if (i == MCP2515_CTRL_REG_CANCTRL)
         {
-            storage->mcp2515_reg_map[i].register_value = MCP2515_CTRL_REG_CANCTRL_VAL;
+            reg_map[i].register_value = MCP2515_CTRL_REG_CANCTRL_VAL;
         }
         else if (i == MCP2515_CTRL_REG_CNF2)
         {
-            storage->mcp2515_reg_map[i].register_value = MCP2515_CTRL_REG_CNF2_VAL;
+            reg_map[i].register_value = MCP2515_CTRL_REG_CNF2_VAL;
         }
         else if (i == MCP2515_CTRL_REG_CNF3)
         {
-            storage->mcp2515_reg_map[i].register_value = MCP2515_CTRL_REG_CNF3_VAL;
+            reg_map[i].register_value = MCP2515_CTRL_REG_CNF3_VAL;
         }
         else
         {
-            storage->mcp2515_reg_map[i].register_value = MCP2515_REG_DEFAULT_VAL;
+            reg_map[i].register_value = MCP2515_REG_DEFAULT_VAL;
         }
     }
 }
 
 void mcp2515_init(MCP2515_Settings *settings, MCP2515_Storage *storage)
 {
-    mcp2515_init_reg_map(storage);
+    mcp2515_init_reg_map(storage->mcp2515_reg_map, MCP2515_NUM_REGISTERS);
 
     settings->spi_storage->rx_data = storage->rx_data;
     settings->spi_storage->rx_index = 0;
