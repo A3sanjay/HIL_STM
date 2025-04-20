@@ -67,6 +67,9 @@ void pca9555_init(PCA9555_Settings *settings, PCA9555_Storage *storage)
 
     I2C_Callbacks i2c_callbacks = {.i2c_process_received_data = pca9555_process_received_data, .i2c_process_address = pca9555_process_address};
     i2c_init(settings->i2c_settings, settings->i2c_storage, PCA9555, &i2c_callbacks);
+
+    memcpy(&pca9555_settings, settings, sizeof(PCA9555_Settings));
+    memcpy(&pca9555_storage, storage, sizeof(PCA9555_Storage));
 }
 
 void pca9555_process_address(I2C_Settings *settings, I2C_Storage *storage, I2C_FSM *i2c_fsm, I2C_Callback_Info *cb_info)

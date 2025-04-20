@@ -96,7 +96,7 @@ void spi_slave_transfer_error_cb(SPI_TypeDef *spi_handle)
 }
 
 // Timer to detect end of SPI transaction (CS pin goes high) and process data
-// TODO: If there are timing issues, this timer could be firing too frequently. It is enabled at the start of a SPI transaction, and fires once every ~50us to check for end of transaction before terminating at end of transaction.
+// TODO: Find alternate way to find end of transaction if possible. It is enabled at the start of a SPI transaction, and fires once every ~50us to check for end of transaction before terminating at end of transaction and could be the source of potential timing issues.
 void spi_timer_cb(TIM_HandleTypeDef *timer_handle)
 {
 	uint8_t spi_index = (spi_settings[0].timer_handle == timer_handle) ? SPI_PORT_1 : SPI_PORT_2;
@@ -104,7 +104,7 @@ void spi_timer_cb(TIM_HandleTypeDef *timer_handle)
 	// Check for end of SPI transaction (CS pin goes high)
 	if (spi_fsm_state[spi_index].spi_slave_state == SPI_SLAVE_RX || spi_fsm_state[spi_index].spi_slave_state == SPI_SLAVE_TX)
 	{
-		if (LL_GPIO_IsInputPinSet(spi_settings[spi_index].cs_pin->gpio_port, spi_settings[spi_index].cs_pin->gpio_pin))
+		if (LL_GPIO_IsInputPinSet(spi_settings[spi_index].cs_pin->gpio_port, spi_settings[spi_index].cs_pin->gpio_pin) && spi_storage[spi_index].rx_index >= 28)
 		{
 			// Transaction is done, so process data and reset everything
 			spi_callbacks[spi_index].spi_rx_process_cb(&(spi_settings[spi_index]), &(spi_storage[spi_index]));

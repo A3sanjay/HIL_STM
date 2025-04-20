@@ -24,7 +24,9 @@
 
 // Necessary handle definitions for interfaces that we are using
 extern I2C_HandleTypeDef hi2c1;
+SPI_TypeDef *spi_handle1 = SPI1;
 SPI_TypeDef *spi_handle2 = SPI2;
+SPI_Typedef *spi_handle3 = SPI3;
 extern TIM_HandleTypeDef htim3;
 extern UART_HandleTypeDef huart1;
 
@@ -54,7 +56,7 @@ void board_control_init(Board_Control *control)
     xTaskCreate(board_control_init_comms, "Board Simulation Init Task", NORMAL_STACK_DEPTH, (void *)control, NORMAL_PRIORITY, control->board_control_task);
 }
 
-// TODO: Update initialization procedure according to driver updates
+// TODO: Update initialization procedure according to driver updates (refer to main.c)
 void board_control_init_comms(void *params)
 {
     Board_Control *control = (Board_Control *)params;

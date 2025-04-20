@@ -137,27 +137,31 @@ int main(void)
   MX_SPI1_Init();
   MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
-  // Testing code here
-  //  I2C_Settings max17261_i2c_settings = {.hi2c = NULL, .i2c_slave_address = MAX17261_I2C_ADDRESS, .i2c_slave_id = I2C_PORT_1};
-  //  MAX17261_Settings settings = {.i2c_settings = &max17261_i2c_settings};
-  //  MAX17261_Storage storage;
-  //  max17261_init_reg_map();
-  //  max17261_init(&settings, &storage);
-  //
-  //  I2C_Settings pca9555_i2c_settings = {.hi2c = &hi2c1, .i2c_slave_address = PCA9555_I2C_ADDRESS, .i2c_slave_id = I2C_PORT_2};
-  //  PCA9555_Settings pca9555_settings = {.i2c_settings = &pca9555_i2c_settings};
-  //  PCA9555_Storage pca9555_storage;
-  //  pca9555_init_reg_map();
-  //  pca9555_init(&pca9555_settings, &pca9555_storage);
+  // Testing code here (for reference to init and test APIs) - currently missing SPI -> CAN Test Code
+  // Current Sense Test Code:
+  // I2C_Settings max17261_i2c_settings = {.hi2c = &hi2c1, .i2c_slave_address = MAX17261_I2C_ADDRESS, .i2c_slave_id = I2C_PORT_1};
+  // I2C_Storage max17261_i2c_storage;
+  // MAX17261_Settings max17261_settings = {.i2c_settings = &max17261_i2c_settings, .i2c_storage = &max17261_i2c_storage};
+  // MAX17261_Storage max17261_storage;
+  // max17261_init(&max17261_settings, &max17261_storage);
 
-   ltc6811_cs_pin.gpio_port = SPI1_CS_GPIO_Port;
-   ltc6811_cs_pin.gpio_pin = SPI1_CS_Pin;
-   SPI_Settings spi_settings = {.spi_handle = SPI1, .spi_port = SPI_PORT_1, .timer_handle = &htim4, .cs_pin = &ltc6811_cs_pin};
-   SPI_Storage spi_storage;
-   LTC6811_Settings ltc6811_settings = {.spi_settings = &spi_settings, .spi_storage = &spi_storage};
-   LTC6811_Storage ltc6811_storage;
-   ltc6811_init(&ltc6811_settings, &ltc6811_storage);
+  // GPIO Expander Test Code:
+  // I2C_Settings pca9555_i2c_settings = {.hi2c = &hi2c1, .i2c_slave_address = PCA9555_I2C_ADDRESS, .i2c_slave_id = I2C_PORT_2};
+  // I2C_Storage pca9555_i2c_storage;
+  // PCA9555_Settings pca9555_settings = {.i2c_settings = &pca9555_i2c_settings, .i2c_storage = &pca9555_i2c_storage};
+  // PCA9555_Storage pca9555_storage;
+  // pca9555_init(&pca9555_settings, &pca9555_storage);
 
+  // AFE Test Code:
+  // ltc6811_cs_pin.gpio_port = SPI1_CS_GPIO_Port;
+  // ltc6811_cs_pin.gpio_pin = SPI1_CS_Pin;
+  // SPI_Settings spi_settings = {.spi_handle = SPI1, .spi_port = SPI_PORT_1, .timer_handle = &htim4, .cs_pin = &ltc6811_cs_pin};
+  // SPI_Storage spi_storage;
+  // LTC6811_Settings ltc6811_settings = {.spi_settings = &spi_settings, .spi_storage = &spi_storage};
+  // LTC6811_Storage ltc6811_storage;
+  // ltc6811_init(&ltc6811_settings, &ltc6811_storage);
+
+  // UART connection with RPi Test Code:
   //  UART_Settings uart_settings;
   //  UART_Control uart_control = {.huart = &huart1, .uart_settings = &uart_settings};
   //  uart_control_rx_init(&uart_control, NULL);
@@ -181,6 +185,7 @@ int main(void)
   // board_control.huart = &huart1;
   // board_control_init(&board_control);
 
+  // DAC Test Code:
   //  GPIO_Pin mcp4811_cs_pin = {.gpio_port = SPI3_CS_GPIO_Port, .gpio_pin = SPI3_CS_Pin};
   //  SPI_Settings mcp4811_spi_settings = {.spi_handle = SPI3, .spi_port = SPI_PORT_3, .cs_pin = &mcp4811_cs_pin};
   //  MCP4811_Settings mcp4811_settings = {.spi_settings = &mcp4811_spi_settings};

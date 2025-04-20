@@ -36,11 +36,13 @@ typedef struct
 typedef struct
 {
     uint8_t ltc6811_reg_data[LTC6811_NUM_BYTES_IN_REG_GROUP];
-} LTC6811_Register_Group;
+} LTC6811_Data_Register_Group;
 
 typedef struct
 {
-    LTC6811_Register_Group ltc6811_reg_group;
+    LTC6811_Data_Register_Group ltc6811_config_reg_group;                   // For config data (no PEC) - adcopt, swtrd, etc
+    LTC6811_Data_Register_Group ltc6811_pwm_discharge_group;                // For PWM discharge info - TODO: figure out what to do with this later
+    LTC6811_Data_Register_Group ltc6811_data_reg_group[LTC6811_NUM_GROUPS]; // Actual data (voltage + temp) - TODO: split up into 6 groups (4 for voltage and 2 for temp)
 } LTC6811_Register_Map;
 
 typedef enum

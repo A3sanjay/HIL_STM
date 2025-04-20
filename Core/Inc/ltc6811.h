@@ -15,7 +15,7 @@
 
 #define MAX_NUM_LTC6811 1
 
-#define LTC6811_SPI_RX_BUFFER_SIZE 10
+#define LTC6811_SPI_RX_BUFFER_SIZE 50
 #define LTC6811_SPI_TX_BUFFER_SIZE 50
 
 // This is the number of devices we are using (max of 12 devices can be daisy-chained together)
@@ -56,7 +56,7 @@ typedef struct
 {
     uint8_t rx_data[LTC6811_SPI_RX_BUFFER_SIZE];
     uint8_t tx_data[LTC6811_SPI_TX_BUFFER_SIZE];
-    LTC6811_Register_Map ltc6811_reg_map[LTC6811_NUM_DEVICES][LTC6811_NUM_GROUPS];
+    LTC6811_Register_Map ltc6811_reg_map[LTC6811_NUM_DEVICES];
 } LTC6811_Storage;
 
 void ltc6811_init(LTC6811_Settings *settings, LTC6811_Storage *storage);

@@ -74,6 +74,9 @@ void max17261_init(MAX17261_Settings *settings, MAX17261_Storage *storage)
 
     I2C_Callbacks i2c_callbacks = {.i2c_process_received_data = max17261_process_received_data, .i2c_process_address = max17261_process_address};
     i2c_init(settings->i2c_settings, settings->i2c_storage, MAX17261, &i2c_callbacks);
+
+    memcpy(&max17261_settings, settings, sizeof(MAX17261_Settings));
+    memcpy(&max17261_storage, storage, sizeof(MAX17261_Storage));
 }
 
 void max17261_process_address(I2C_Settings *settings, I2C_Storage *storage, I2C_FSM *i2c_fsm, I2C_Callback_Info *cb_info)
@@ -123,7 +126,7 @@ void max17261_process_received_data(I2C_Settings *settings, I2C_Storage *storage
             if (reg_to_write != MAX17261_MODEL_I_CFG)
             {
                 max17261_storage.max17261_reg_map[reg_to_write].register_value = data_to_write;
-                prv_max17261_send_i2c_write_update_event(reg_to_write, data_to_write);
+//                prv_max17261_send_i2c_write_update_event(reg_to_write, data_to_write);
             }
         }
 
