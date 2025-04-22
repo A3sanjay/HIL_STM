@@ -25,7 +25,8 @@ static PCA9555_Storage pca9555_storage;
 static void prv_pca9555_send_i2c_write_update_event(uint8_t register_to_update, uint8_t value_to_write)
 {
     // Encode using Proto and send over UART
-    I2C_Write_Update_Event i2c_update_event = {.peripheral_to_update = PCA9555_I2C_WRITE_EVENT, .i2c_address = PCA9555_I2C_ADDRESS, .register_to_update = register_to_update, .value_to_write = value_to_write};
+    // TODO: Update PCA address as we have two
+    I2C_Write_Update_Event i2c_update_event = {.peripheral_to_update = PCA9555_I2C_WRITE_EVENT, .i2c_address = PCA9555_1_I2C_ADDRESS, .register_to_update = register_to_update, .value_to_write = value_to_write};
 
     uint8_t buffer_to_encode[MIN_I2C_WRITE_UPDATE_EVENT_BUFFER_SIZE];
     Proto_Encode_Storage storage = {.buffer_to_encode = buffer_to_encode, sizeof(buffer_to_encode)};
@@ -66,7 +67,7 @@ void pca9555_init(PCA9555_Settings *settings, PCA9555_Storage *storage)
     settings->i2c_storage->tx_buffer_size = PCA9555_I2C_TX_BUFFER_SIZE;
 
     I2C_Callbacks i2c_callbacks = {.i2c_process_received_data = pca9555_process_received_data, .i2c_process_address = pca9555_process_address};
-    i2c_init(settings->i2c_settings, settings->i2c_storage, PCA9555, &i2c_callbacks);
+    i2c_init(settings->i2c_settings, settings->i2c_storage, settings->i2c_settings->i2c_slave_address, &i2c_callbacks);
 
     memcpy(&pca9555_settings, settings, sizeof(PCA9555_Settings));
     memcpy(&pca9555_storage, storage, sizeof(PCA9555_Storage));

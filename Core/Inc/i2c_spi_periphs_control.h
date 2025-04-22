@@ -18,12 +18,16 @@
 
 #define MAX_I2C_SLAVES_TO_SIMULATE NUM_I2C_PORTS
 #define MAX_SPI_SLAVES_TO_SIMULATE NUM_SPI_PORTS
+#define MAX_SPI_MASTERS NUM_SPI_MASTER_PORTS // DACs are the main peripheral that we need a master for
 
 #define TASK_NOTIFICATION_INDEX 1
 
-// TODO: Update for all simulation boards with reasonable values from 0V - 4V (DAC range) for the signal that the board receives
+// TODO: Update for all simulation boards with reasonable defautl values from 0V - 4V (DAC range) for the signal that the board receives
 #define NUM_POWER_DISTRIBUTION_ANALOG_SIGNALS 1
 #define POWER_DISTRIBUTION_ANALOG_SIGNAL_DEFAULT_VOLTAGE 2.5F
+#define CENTRE_CONSOLE_ANALOG_SIGNAL_DEFAULT_VOLTAGE 2.5F
+#define MCI_ANALOG_SIGNAL_DEFAULT_VOLTAGE 2.5F
+#define BMS_ANALOG_SIGNAL_DEFAULT_VOLTAGE 2.5F
 
 typedef struct
 {
@@ -42,7 +46,6 @@ typedef enum
 } BOARDS_TO_SIMULATE;
 
 void board_control_init(Board_Control *control);
-void board_control_init_comms(void *params);
 void board_control_start_simulation(BOARDS_TO_SIMULATE board);
 void board_control_setup_complete(UART_Control *control);
 

@@ -104,7 +104,7 @@ void spi_timer_cb(TIM_HandleTypeDef *timer_handle)
 	// Check for end of SPI transaction (CS pin goes high)
 	if (spi_fsm_state[spi_index].spi_slave_state == SPI_SLAVE_RX || spi_fsm_state[spi_index].spi_slave_state == SPI_SLAVE_TX)
 	{
-		if (LL_GPIO_IsInputPinSet(spi_settings[spi_index].cs_pin->gpio_port, spi_settings[spi_index].cs_pin->gpio_pin) && spi_storage[spi_index].rx_index >= 28)
+		if (LL_GPIO_IsInputPinSet(spi_settings[spi_index].cs_pin->gpio_port, spi_settings[spi_index].cs_pin->gpio_pin))
 		{
 			// Transaction is done, so process data and reset everything
 			spi_callbacks[spi_index].spi_rx_process_cb(&(spi_settings[spi_index]), &(spi_storage[spi_index]));

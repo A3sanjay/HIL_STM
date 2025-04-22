@@ -1,4 +1,0 @@
-../Core/Src/pca9555.c:50:6:pca9555_process_received_data	4	static
-../Core/Src/pca9555.c:81:6:pca9555_process_address	16	static
-../Core/Src/pca9555.c:17:6:pca9555_init_reg_map	4	static
-../Core/Src/pca9555.c:36:6:pca9555_init	24	static

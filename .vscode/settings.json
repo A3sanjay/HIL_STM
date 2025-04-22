@@ -22,6 +22,23 @@
     "uart_fsm_defs.h": "c",
     "mcp2515.h": "c",
     "mcp2515_defs.h": "c",
-    "pca9555_defs.h": "c"
+    "pca9555_defs.h": "c",
+    "proto_processing.h": "c",
+    "uart_control_fsm_defs.h": "c",
+    "update_event_message.pb.h": "c",
+    "cmsis_os.h": "c",
+    "free_rtos_support.h": "c",
+    "freertos.h": "c",
+    "set_board_response.pb.h": "c",
+    "mcp4811.h": "c",
+    "gpio_defs.h": "c",
+    "spi_master.h": "c",
+    "stm32f4xx_ll_bus.h": "c",
+    "stm32f4xx_ll_rcc.h": "c",
+    "stm32f4xx_ll_cortex.h": "c",
+    "stm32f4xx_ll_dma.h": "c",
+    "stm32f4xx_hal.h": "c",
+    "ltc6811.h": "c",
+    "crc15.h": "c"
   }
 }

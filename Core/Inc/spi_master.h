@@ -15,6 +15,7 @@
 #include "spi_slave.h"
 #include "gpio_defs.h"
 
+// TODO: Change this to 2 (STM32 F401RE only has 1 SPI port for DAC, but when we switch to G series, we can update this)
 #define NUM_SPI_MASTER_PORTS 1
 
 void spi_master_init(SPI_Settings *settings);

@@ -1,5 +1,0 @@
-spi_slave.c:23:6:spi_init	2
-spi_slave.c:40:6:spi2_rx_cb	4
-spi_slave.c:71:6:spi2_tx_cb	3
-spi_slave.c:92:6:spi2_transfererror_cb	1
-spi_slave.c:100:6:HAL_TIM_PeriodElapsedCallback	4

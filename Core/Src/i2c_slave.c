@@ -18,6 +18,7 @@ static volatile I2C_Settings i2c_settings[NUM_I2C_SLAVE_DEVICES];
 static volatile I2C_Storage i2c_storage[NUM_I2C_SLAVE_DEVICES];
 static uint8_t i2c_address_mapping[NUM_I2C_ADDRESSES] = {0};
 static I2C_Callbacks i2c_callbacks[NUM_I2C_SLAVE_DEVICES];
+uint8_t curr_addr = 0;
 
 void i2c_init(I2C_Settings *settings, I2C_Storage *storage, I2C_SLAVE_SELECT slave_select, I2C_Callbacks *cbs)
 {
@@ -37,7 +38,7 @@ void i2c_init(I2C_Settings *settings, I2C_Storage *storage, I2C_SLAVE_SELECT sla
 // Callback for the end of a full I2C transmission (Read or Write)
 void HAL_I2C_ListenCpltCallback(I2C_HandleTypeDef *hi2c)
 {
-	uint8_t i2c_index = (hi2c == i2c_settings[0].hi2c) ? 0 : 1;
+	uint8_t i2c_index = (curr_addr == i2c_settings[0].i2c_slave_address) ? I2C_PORT_1 : I2C_PORT_2;
 
 	i2c_callbacks[i2c_index].i2c_process_received_data(&(i2c_settings[i2c_index]), &(i2c_storage[i2c_index]), &i2c_fsm_state[i2c_index]);
 }
@@ -47,6 +48,7 @@ void HAL_I2C_AddrCallback(I2C_HandleTypeDef *hi2c, uint8_t TransferDirection, ui
 {
 	uint16_t i2c_slave_address = AddrMatchCode >> 1;
 	uint8_t i2c_index = i2c_address_mapping[i2c_slave_address];
+	curr_addr = i2c_slave_address;
 
 	I2C_Callback_Info cb_info = {.transfer_direction = TransferDirection, .i2c_slave_address = i2c_slave_address};
 
@@ -60,7 +62,7 @@ void HAL_I2C_SlaveRxCpltCallback(I2C_HandleTypeDef *hi2c)
 // Callback for the end of a tx operation by the slave
 void HAL_I2C_SlaveTxCpltCallback(I2C_HandleTypeDef *hi2c)
 {
-	uint8_t i2c_index = (hi2c == i2c_settings[0].hi2c) ? 0 : 1;
+	uint8_t i2c_index = (curr_addr == i2c_settings[0].i2c_slave_address) ? I2C_PORT_1 : I2C_PORT_2;
 
 	i2c_fsm_state[i2c_index].i2c_slave_select = I2C_NO_SLAVE;
 	i2c_fsm_state[i2c_index].i2c_slave_state = I2C_IDLE;

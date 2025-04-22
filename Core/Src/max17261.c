@@ -126,7 +126,7 @@ void max17261_process_received_data(I2C_Settings *settings, I2C_Storage *storage
             if (reg_to_write != MAX17261_MODEL_I_CFG)
             {
                 max17261_storage.max17261_reg_map[reg_to_write].register_value = data_to_write;
-//                prv_max17261_send_i2c_write_update_event(reg_to_write, data_to_write);
+                // prv_max17261_send_i2c_write_update_event(reg_to_write, data_to_write);
             }
         }
 

@@ -1,2 +1,0 @@
-i2c_spi_periphs_control.c:24:6:board_control_init	4
-i2c_spi_periphs_control.c:61:6:switch_simulated_board	1

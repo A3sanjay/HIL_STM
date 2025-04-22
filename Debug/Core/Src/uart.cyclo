@@ -1,3 +1,0 @@
-uart.c:21:6:uart_init	2
-uart.c:31:6:uart_receive	2
-uart.c:42:6:HAL_UART_RxCpltCallback	1
